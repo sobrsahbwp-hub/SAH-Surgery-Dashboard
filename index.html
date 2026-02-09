@@ -20,50 +20,54 @@ body{
 }
 .header{
     text-align:center;
-    margin-bottom:15px;
+    margin-bottom:10px;
 }
 .header h1{margin:0;color:#0b4f6c;}
 .header h3{margin:5px 0;color:#555;}
 
 .card{
     background:#fff;
-    padding:15px;
+    padding:12px;
     border-radius:8px;
-    margin-bottom:15px;
+    margin-bottom:12px;
     box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
 .filters{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:10px;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:8px;
 }
-label{font-size:13px;font-weight:bold;}
-select,input{width:100%;padding:6px;}
+label{font-size:12px;font-weight:bold;}
+select,input{width:100%;padding:5px;font-size:12px;}
 
 .kpis{
     display:flex;
-    gap:15px;
+    gap:10px;
     text-align:center;
 }
 .kpi{
     flex:1;
     background:#eaf4f4;
-    padding:15px;
+    padding:10px;
     border-radius:8px;
 }
 .kpi h2{margin:0;color:#0b4f6c;}
 
-.chart-box{
-    max-width:420px;
-    margin:auto;
+.charts{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:15px;
 }
-canvas{height:260px !important;}
+.chart-box{
+    text-align:center;
+}
+canvas{height:240px !important;}
 
 footer{
     text-align:center;
-    margin-top:20px;
-    font-size:13px;
+    margin-top:10px;
+    font-size:12px;
     color:#555;
 }
 
@@ -78,6 +82,18 @@ footer{
     border-radius:6px;
     cursor:pointer;
 }
+
+/* PRINT (A4 REPORT) */
+@media print{
+    body{background:#fff;padding:0;}
+    .filters,.export-btn{display:none;}
+    .card{box-shadow:none;}
+    canvas{height:220px !important;}
+    @page{
+        size:A4;
+        margin:12mm;
+    }
+}
 </style>
 </head>
 
@@ -86,12 +102,13 @@ footer{
 <div id="dashboard">
 
 <div class="header">
-    <h1>🩺 SADIQ ABBASI HOSPITAL</h1>
-    <h3>Bahawalpur</h3>
+    <h1>SADIQ ABBASI HOSPITAL</h1>
+    <h3>Bahawalpur – Surgery Statistics Report</h3>
 </div>
 
 <div class="card filters">
-    <div><label>OT</label>
+    <div>
+        <label>OT</label>
         <select id="ot">
             <option>ALL OTS</option>
             <option>MAIN OT</option>
@@ -100,7 +117,8 @@ footer{
         </select>
     </div>
 
-    <div><label>Ward</label>
+    <div>
+        <label>Ward</label>
         <select id="ward">
             <option>ALL WARDS</option>
             <option>GYNAE</option>
@@ -110,7 +128,8 @@ footer{
         </select>
     </div>
 
-    <div><label>Gender</label>
+    <div>
+        <label>Gender</label>
         <select id="gender">
             <option>ALL GENDERS</option>
             <option>MALE</option>
@@ -119,24 +138,8 @@ footer{
         </select>
     </div>
 
-    <div><label>Anaesthesia</label>
-        <select id="ana">
-            <option>ALL TYPE</option>
-            <option>LOCAL</option>
-            <option>GENERAL</option>
-            <option>SPINE</option>
-        </select>
-    </div>
-
-    <div><label>Surgery Type</label>
-        <select id="stype">
-            <option>ALL TYPES</option>
-            <option>MAJOR</option>
-            <option>MINOR</option>
-        </select>
-    </div>
-
-    <div><label>Age Group</label>
+    <div>
+        <label>Age Group</label>
         <select id="age">
             <option>ALL AGES</option>
             <option>Below 30 Days</option>
@@ -148,18 +151,42 @@ footer{
         </select>
     </div>
 
-    <div><label>From Date</label><input type="date" id="from"></div>
-    <div><label>To Date</label><input type="date" id="to"></div>
+    <div>
+        <label>From Date</label>
+        <input type="date" id="from">
+    </div>
+
+    <div>
+        <label>To Date</label>
+        <input type="date" id="to">
+    </div>
 </div>
 
 <div class="card kpis">
-    <div class="kpi"><h2 id="major">0</h2><p>Major Surgeries</p></div>
-    <div class="kpi"><h2 id="minor">0</h2><p>Minor Surgeries</p></div>
-    <div class="kpi"><h2 id="total">0</h2><p>Total Surgeries</p></div>
+    <div class="kpi">
+        <h2 id="total">0</h2>
+        <p>Total Surgeries</p>
+    </div>
+    <div class="kpi">
+        <h2 id="male">0</h2>
+        <p>Male Surgeries</p>
+    </div>
+    <div class="kpi">
+        <h2 id="female">0</h2>
+        <p>Female Surgeries</p>
+    </div>
 </div>
 
-<div class="card chart-box">
-    <canvas id="otChart"></canvas>
+<div class="card charts">
+    <div class="chart-box">
+        <canvas id="otChart"></canvas>
+    </div>
+    <div class="chart-box">
+        <canvas id="wardChart"></canvas>
+    </div>
+    <div class="chart-box">
+        <canvas id="genderChart"></canvas>
+    </div>
 </div>
 
 </div>
@@ -175,72 +202,81 @@ Developed By: Software Engineer
 </footer>
 
 <script>
-const url="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
-let data=[],chart;
+const sheetURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
-fetch(url).then(r=>r.text()).then(csv=>{
-    let rows=csv.split("\n").map(r=>r.split(","));
-    let h=rows.shift();
-    data=rows.map(r=>Object.fromEntries(h.map((k,i)=>[k.trim(),r[i]?.trim()])));
-    apply();
+let data=[], otChart, wardChart, genderChart;
+
+fetch(sheetURL)
+.then(r=>r.text())
+.then(csv=>{
+    const rows = csv.split("\n").map(r=>r.split(","));
+    const headers = rows.shift();
+    data = rows.map(r =>
+        Object.fromEntries(headers.map((h,i)=>[h.trim(), r[i]?.trim()]))
+    );
+    applyFilters();
 });
 
-document.querySelectorAll("select,input").forEach(e=>e.onchange=apply);
+document.querySelectorAll("select,input").forEach(e => e.onchange = applyFilters);
 
-function ageOK(a,g){
-    a=parseFloat(a);
-    if(g=="Below 30 Days")return a<0.1;
-    if(g=="1 Month to 1 Year")return a>=0.1&&a<1;
-    if(g=="1 Year to 15 Years")return a>=1&&a<15;
-    if(g=="15 to 30 Years")return a>=15&&a<30;
-    if(g=="30 Years to 45 Years")return a>=30&&a<45;
-    if(g=="45 Years & above")return a>=45;
+function ageMatch(age, group){
+    age = parseFloat(age);
+    if(group==="Below 30 Days") return age < 0.1;
+    if(group==="1 Month to 1 Year") return age >=0.1 && age <1;
+    if(group==="1 Year to 15 Years") return age >=1 && age <15;
+    if(group==="15 to 30 Years") return age >=15 && age <30;
+    if(group==="30 Years to 45 Years") return age >=30 && age <45;
+    if(group==="45 Years & above") return age >=45;
     return true;
 }
 
-function apply(){
-let f=data.filter(d=>{
-    if(ot.value!="ALL OTS"&&d.OT!=ot.value)return false;
-    if(ward.value!="ALL WARDS"&&d.WARD!=ward.value)return false;
-    if(gender.value!="ALL GENDERS"&&d.GENDER!=gender.value)return false;
-    if(ana.value!="ALL TYPE"&&d.Anaesthesia!=ana.value)return false;
-    if(stype.value!="ALL TYPES"&&d.Type!=stype.value)return false;
-    if(age.value!="ALL AGES"&&!ageOK(d.AGE,age.value))return false;
-    if(from.value&&new Date(d.DATE)<new Date(from.value))return false;
-    if(to.value&&new Date(d.DATE)>new Date(to.value))return false;
-    return true;
-});
+function applyFilters(){
+    const filtered = data.filter(d=>{
+        if(ot.value!=="ALL OTS" && d.OT!==ot.value) return false;
+        if(ward.value!=="ALL WARDS" && d.WARD!==ward.value) return false;
+        if(gender.value!=="ALL GENDERS" && d.GENDER!==gender.value) return false;
+        if(age.value!=="ALL AGES" && !ageMatch(d.AGE, age.value)) return false;
+        if(from.value && new Date(d.DATE) < new Date(from.value)) return false;
+        if(to.value && new Date(d.DATE) > new Date(to.value)) return false;
+        return true;
+    });
 
-major.textContent=f.filter(x=>x.Type=="MAJOR").length;
-minor.textContent=f.filter(x=>x.Type=="MINOR").length;
-total.textContent=f.length;
+    total.textContent = filtered.length;
+    male.textContent = filtered.filter(x=>x.GENDER==="MALE").length;
+    female.textContent = filtered.filter(x=>x.GENDER==="FEMALE").length;
 
-drawOT(f);
+    drawChart("OT Wise Surgeries", filtered, "OT", "otChart", c=>otChart=c);
+    drawChart("Ward Wise Surgeries", filtered, "WARD", "wardChart", c=>wardChart=c);
+    drawChart("Gender Wise Surgeries", filtered, "GENDER", "genderChart", c=>genderChart=c);
 }
 
-function drawOT(f){
-let c={};
-f.forEach(x=>c[x.OT]=(c[x.OT]||0)+1);
-if(chart)chart.destroy();
-chart=new Chart(document.getElementById("otChart"),{
-    type:"pie",
-    data:{
-        labels:Object.keys(c).map(k=>k+" ("+c[k]+")"),
-        datasets:[{data:Object.values(c)}]
-    },
-    options:{
-        plugins:{title:{display:true,text:"OT Wise Surgeries"}}
-    }
-});
+function drawChart(title, rows, field, canvasId, setter){
+    const counts = {};
+    rows.forEach(r => counts[r[field]] = (counts[r[field]]||0)+1);
+
+    const chartVar = eval(canvasId.replace("Chart","Chart"));
+    if(chartVar) chartVar.destroy();
+
+    const chart = new Chart(document.getElementById(canvasId),{
+        type:"pie",
+        data:{
+            labels:Object.keys(counts).map(k=>`${k} (${counts[k]})`),
+            datasets:[{ data:Object.values(counts) }]
+        },
+        options:{ plugins:{ title:{ display:true, text:title } } }
+    });
+    setter(chart);
 }
 
 function exportPDF(){
-html2canvas(document.getElementById("dashboard")).then(c=>{
-const pdf=new jspdf.jsPDF("p","mm","a4");
-let w=210,h=c.height*w/c.width;
-pdf.addImage(c.toDataURL(),"PNG",0,10,w,h);
-pdf.save("SAH_OT_Dashboard.pdf");
-});
+    html2canvas(document.getElementById("dashboard")).then(canvas=>{
+        const pdf = new jspdf.jsPDF("p","mm","a4");
+        const w = 210;
+        const h = canvas.height * w / canvas.width;
+        pdf.addImage(canvas.toDataURL("image/png"),"PNG",0,8,w,h);
+        pdf.save("SAH_Surgery_Report_A4.pdf");
+    });
 }
 </script>
 
