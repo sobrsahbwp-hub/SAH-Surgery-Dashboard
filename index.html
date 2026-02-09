@@ -25,7 +25,7 @@ body{
 .header h1{margin:0;color:#0b4f6c;}
 .header h3{margin:5px 0;color:#555;}
 
-.box{
+.card{
     background:#fff;
     padding:15px;
     border-radius:8px;
@@ -54,12 +54,11 @@ select,input{width:100%;padding:6px;}
 }
 .kpi h2{margin:0;color:#0b4f6c;}
 
-.charts{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-    gap:20px;
+.chart-box{
+    max-width:420px;
+    margin:auto;
 }
-canvas{max-width:100%;height:260px !important;}
+canvas{height:260px !important;}
 
 footer{
     text-align:center;
@@ -91,22 +90,52 @@ footer{
     <h3>Bahawalpur</h3>
 </div>
 
-<div class="box filters">
+<div class="card filters">
     <div><label>OT</label>
-        <select id="ot"><option>ALL OTS</option><option>MAIN OT</option><option>GYNAE OT</option><option>EMERGENCY OT</option></select>
+        <select id="ot">
+            <option>ALL OTS</option>
+            <option>MAIN OT</option>
+            <option>GYNAE OT</option>
+            <option>EMERGENCY OT</option>
+        </select>
     </div>
+
     <div><label>Ward</label>
-        <select id="ward"><option>ALL WARDS</option><option>GYNAE</option><option>ORTHO</option><option>SURGERY</option><option>EYE</option></select>
+        <select id="ward">
+            <option>ALL WARDS</option>
+            <option>GYNAE</option>
+            <option>ORTHO</option>
+            <option>SURGERY</option>
+            <option>EYE</option>
+        </select>
     </div>
+
     <div><label>Gender</label>
-        <select id="gender"><option>ALL GENDERS</option><option>MALE</option><option>FEMALE</option><option>TRANSGENDER</option></select>
+        <select id="gender">
+            <option>ALL GENDERS</option>
+            <option>MALE</option>
+            <option>FEMALE</option>
+            <option>TRANSGENDER</option>
+        </select>
     </div>
+
     <div><label>Anaesthesia</label>
-        <select id="ana"><option>ALL TYPE</option><option>LOCAL</option><option>GENERAL</option><option>SPINE</option></select>
+        <select id="ana">
+            <option>ALL TYPE</option>
+            <option>LOCAL</option>
+            <option>GENERAL</option>
+            <option>SPINE</option>
+        </select>
     </div>
+
     <div><label>Surgery Type</label>
-        <select id="stype"><option>ALL TYPES</option><option>MAJOR</option><option>MINOR</option></select>
+        <select id="stype">
+            <option>ALL TYPES</option>
+            <option>MAJOR</option>
+            <option>MINOR</option>
+        </select>
     </div>
+
     <div><label>Age Group</label>
         <select id="age">
             <option>ALL AGES</option>
@@ -118,22 +147,19 @@ footer{
             <option>45 Years & above</option>
         </select>
     </div>
+
     <div><label>From Date</label><input type="date" id="from"></div>
     <div><label>To Date</label><input type="date" id="to"></div>
 </div>
 
-<div class="box kpis">
+<div class="card kpis">
     <div class="kpi"><h2 id="major">0</h2><p>Major Surgeries</p></div>
     <div class="kpi"><h2 id="minor">0</h2><p>Minor Surgeries</p></div>
     <div class="kpi"><h2 id="total">0</h2><p>Total Surgeries</p></div>
 </div>
 
-<div class="box charts">
+<div class="card chart-box">
     <canvas id="otChart"></canvas>
-    <canvas id="wardChart"></canvas>
-    <canvas id="genderChart"></canvas>
-    <canvas id="anaChart"></canvas>
-    <canvas id="typeChart"></canvas>
 </div>
 
 </div>
@@ -141,13 +167,16 @@ footer{
 <button class="export-btn" onclick="exportPDF()">Export to PDF</button>
 
 <footer>
-Developed By: Software Engineer <strong>MUHAMMAD UMAIR SYED</strong>  
+Developed By: Software Engineer
+<a href="https://www.linkedin.com/in/smus79" target="_blank">
+<strong>MUHAMMAD UMAIR SYED</strong>
+</a>
 (IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
 </footer>
 
 <script>
 const url="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
-let data=[],charts={};
+let data=[],chart;
 
 fetch(url).then(r=>r.text()).then(csv=>{
     let rows=csv.split("\n").map(r=>r.split(","));
@@ -186,22 +215,22 @@ major.textContent=f.filter(x=>x.Type=="MAJOR").length;
 minor.textContent=f.filter(x=>x.Type=="MINOR").length;
 total.textContent=f.length;
 
-draw("otChart","OT",f,"OT Wise");
-draw("wardChart","WARD",f,"Ward Wise");
-draw("genderChart","GENDER",f,"Gender Wise");
-draw("anaChart","Anaesthesia",f,"Anaesthesia Type");
-draw("typeChart","Type",f,"Surgery Type");
+drawOT(f);
 }
 
-function draw(id,key,f,title){
+function drawOT(f){
 let c={};
-f.forEach(x=>c[x[key]]=(c[x[key]]||0)+1);
-if(charts[id])charts[id].destroy();
-charts[id]=new Chart(document.getElementById(id),{
+f.forEach(x=>c[x.OT]=(c[x.OT]||0)+1);
+if(chart)chart.destroy();
+chart=new Chart(document.getElementById("otChart"),{
     type:"pie",
-    data:{labels:Object.keys(c).map(k=>k+" ("+c[k]+")"),
-    datasets:[{data:Object.values(c)}]},
-    options:{plugins:{title:{display:true,text:title}}}
+    data:{
+        labels:Object.keys(c).map(k=>k+" ("+c[k]+")"),
+        datasets:[{data:Object.values(c)}]
+    },
+    options:{
+        plugins:{title:{display:true,text:"OT Wise Surgeries"}}
+    }
 });
 }
 
@@ -210,7 +239,7 @@ html2canvas(document.getElementById("dashboard")).then(c=>{
 const pdf=new jspdf.jsPDF("p","mm","a4");
 let w=210,h=c.height*w/c.width;
 pdf.addImage(c.toDataURL(),"PNG",0,10,w,h);
-pdf.save("SAH_Surgery_Dashboard.pdf");
+pdf.save("SAH_OT_Dashboard.pdf");
 });
 }
 </script>
