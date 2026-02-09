@@ -12,80 +12,72 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body {
+body{
     font-family: Arial, sans-serif;
-    background: #f2f4f7;
-    margin: 0;
-    padding: 20px;
+    background:#f4f6f9;
+    margin:0;
+    padding:20px;
 }
-.header {
-    text-align: center;
-    margin-bottom: 15px;
+.header{
+    text-align:center;
+    margin-bottom:15px;
 }
-.header h1 {
-    margin: 0;
-    color: #0b4f6c;
+.header h1{margin:0;color:#0b4f6c;}
+.header h3{margin:5px 0;color:#555;}
+
+.box{
+    background:#fff;
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:15px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
-.header h3 {
-    margin: 4px 0;
-    color: #555;
+
+.filters{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:10px;
 }
-.section {
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+label{font-size:13px;font-weight:bold;}
+select,input{width:100%;padding:6px;}
+
+.kpis{
+    display:flex;
+    gap:15px;
+    text-align:center;
 }
-.filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 10px;
+.kpi{
+    flex:1;
+    background:#eaf4f4;
+    padding:15px;
+    border-radius:8px;
 }
-label {
-    font-size: 13px;
-    font-weight: bold;
+.kpi h2{margin:0;color:#0b4f6c;}
+
+.charts{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:20px;
 }
-select, input[type="date"] {
-    width: 100%;
-    padding: 6px;
+canvas{max-width:100%;height:260px !important;}
+
+footer{
+    text-align:center;
+    margin-top:20px;
+    font-size:13px;
+    color:#555;
 }
-.kpis {
-    display: flex;
-    gap: 15px;
-    text-align: center;
-}
-.kpi {
-    flex: 1;
-    background: #eaf4f4;
-    padding: 15px;
-    border-radius: 8px;
-}
-.kpi h2 {
-    margin: 0;
-    color: #0b4f6c;
-}
-.charts {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-}
-footer {
-    margin-top: 25px;
-    text-align: center;
-    font-size: 13px;
-    color: #555;
-}
-.export-btn {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    padding: 10px 16px;
-    background: #0b4f6c;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+
+.export-btn{
+    position:fixed;
+    bottom:20px;
+    left:20px;
+    background:#0b4f6c;
+    color:#fff;
+    border:none;
+    padding:10px 16px;
+    border-radius:6px;
+    cursor:pointer;
 }
 </style>
 </head>
@@ -99,7 +91,7 @@ footer {
     <h3>Bahawalpur</h3>
 </div>
 
-<div class="section filters">
+<div class="box filters">
     <div><label>OT</label>
         <select id="ot"><option>ALL OTS</option><option>MAIN OT</option><option>GYNAE OT</option><option>EMERGENCY OT</option></select>
     </div>
@@ -130,13 +122,13 @@ footer {
     <div><label>To Date</label><input type="date" id="to"></div>
 </div>
 
-<div class="section kpis">
+<div class="box kpis">
     <div class="kpi"><h2 id="major">0</h2><p>Major Surgeries</p></div>
     <div class="kpi"><h2 id="minor">0</h2><p>Minor Surgeries</p></div>
     <div class="kpi"><h2 id="total">0</h2><p>Total Surgeries</p></div>
 </div>
 
-<div class="section charts">
+<div class="box charts">
     <canvas id="otChart"></canvas>
     <canvas id="wardChart"></canvas>
     <canvas id="genderChart"></canvas>
@@ -154,8 +146,8 @@ Developed By: Software Engineer <strong>MUHAMMAD UMAIR SYED</strong>
 </footer>
 
 <script>
-const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
-let data=[], charts={};
+const url="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
+let data=[],charts={};
 
 fetch(url).then(r=>r.text()).then(csv=>{
     let rows=csv.split("\n").map(r=>r.split(","));
@@ -168,12 +160,12 @@ document.querySelectorAll("select,input").forEach(e=>e.onchange=apply);
 
 function ageOK(a,g){
     a=parseFloat(a);
-    if(g=="Below 30 Days") return a<0.1;
-    if(g=="1 Month to 1 Year") return a>=0.1&&a<1;
-    if(g=="1 Year to 15 Years") return a>=1&&a<15;
-    if(g=="15 to 30 Years") return a>=15&&a<30;
-    if(g=="30 Years to 45 Years") return a>=30&&a<45;
-    if(g=="45 Years & above") return a>=45;
+    if(g=="Below 30 Days")return a<0.1;
+    if(g=="1 Month to 1 Year")return a>=0.1&&a<1;
+    if(g=="1 Year to 15 Years")return a>=1&&a<15;
+    if(g=="15 to 30 Years")return a>=15&&a<30;
+    if(g=="30 Years to 45 Years")return a>=30&&a<45;
+    if(g=="45 Years & above")return a>=45;
     return true;
 }
 
@@ -194,20 +186,22 @@ major.textContent=f.filter(x=>x.Type=="MAJOR").length;
 minor.textContent=f.filter(x=>x.Type=="MINOR").length;
 total.textContent=f.length;
 
-draw("otChart","OT",f);
-draw("wardChart","WARD",f);
-draw("genderChart","GENDER",f);
-draw("anaChart","Anaesthesia",f);
-draw("typeChart","Type",f);
+draw("otChart","OT",f,"OT Wise");
+draw("wardChart","WARD",f,"Ward Wise");
+draw("genderChart","GENDER",f,"Gender Wise");
+draw("anaChart","Anaesthesia",f,"Anaesthesia Type");
+draw("typeChart","Type",f,"Surgery Type");
 }
 
-function draw(id,key,f){
+function draw(id,key,f,title){
 let c={};
 f.forEach(x=>c[x[key]]=(c[x[key]]||0)+1);
 if(charts[id])charts[id].destroy();
 charts[id]=new Chart(document.getElementById(id),{
     type:"pie",
-    data:{labels:Object.keys(c),datasets:[{data:Object.values(c)}]}
+    data:{labels:Object.keys(c).map(k=>k+" ("+c[k]+")"),
+    datasets:[{data:Object.values(c)}]},
+    options:{plugins:{title:{display:true,text:title}}}
 });
 }
 
