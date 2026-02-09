@@ -1,4 +1,4 @@
-<6th Dashboard>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -24,6 +24,7 @@ header{
 }
 header img{height:85px;}
 .container{padding:20px;}
+
 .filters{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -35,6 +36,7 @@ select,input{
     border-radius:5px;
     border:1px solid #ccc;
 }
+
 .kpis{
     margin-top:20px;
     display:grid;
@@ -57,6 +59,7 @@ select,input{
     font-weight:600;
     color:#555;
 }
+
 .charts{
     margin-top:30px;
     display:flex;
@@ -71,6 +74,7 @@ select,input{
     border-radius:10px;
     box-shadow:0 4px 8px rgba(0,0,0,.1);
 }
+
 footer{
     background:#203a43;
     color:#fff;
@@ -82,12 +86,14 @@ footer a{
     color:#ffd700;
     text-decoration:none;
 }
+
 .fixed-btn{
     position:fixed;
     bottom:20px;
 }
 #exportBtn{left:20px;}
 #refreshBtn{right:20px;}
+
 button{
     padding:10px 15px;
     background:#2c5364;
@@ -120,7 +126,7 @@ button{
 <div><label>TO DATE</label><input type="date" id="toDate"></div>
 </div>
 
-<!-- KPIs (FIGURES ONLY) -->
+<!-- KPIs -->
 <div class="kpis">
 <div class="kpi"><h1 id="total">0</h1><span>Total Surgeries</span></div>
 <div class="kpi"><h1 id="male">0</h1><span>Male Surgeries</span></div>
@@ -196,10 +202,10 @@ function render(){
  });
 
  total.textContent=data.length;
- male.textContent=data.filter(d=>d.GENDER=="MALE").length;
- female.textContent=data.filter(d=>d.GENDER=="FEMALE").length;
- major.textContent=data.filter(d=>d.TYPE=="MAJOR").length;
- minor.textContent=data.filter(d=>d.TYPE=="MINOR").length;
+ male.textContent=data.filter(x=>x.GENDER==="MALE").length;
+ female.textContent=data.filter(x=>x.GENDER==="FEMALE").length;
+ major.textContent=data.filter(x=>x.TYPE==="MAJOR").length;
+ minor.textContent=data.filter(x=>x.TYPE==="MINOR").length;
 
  drawBar("otChart","OT Wise Surgeries",group(data,"OT"));
  drawBar("wardChart","Ward Wise Surgeries",group(data,"WARD"));
@@ -213,7 +219,16 @@ function drawBar(id,title,data){
  if(charts[id]) charts[id].destroy();
  charts[id]=new Chart(document.getElementById(id),{
   type:"bar",
-  data:{labels:Object.keys(data),datasets:[{data:Object.values(data)}]},
+  data:{
+   labels:Object.keys(data),
+   datasets:[{
+     data:Object.values(data),
+     backgroundColor:[
+      "#1abc9c","#3498db","#9b59b6",
+      "#f39c12","#e74c3c","#2ecc71"
+     ]
+   }]
+  },
   options:{
    plugins:{title:{display:true,text:title}},
    scales:{y:{beginAtZero:true}}
