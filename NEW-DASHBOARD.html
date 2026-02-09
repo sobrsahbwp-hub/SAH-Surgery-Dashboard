@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Hospital Surgical Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+}
+header {
+    background: #0b5394;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+}
+.filters, .kpis {
+    background: white;
+    margin: 10px;
+    padding: 15px;
+    border-radius: 6px;
+}
+.filters {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+.filters label {
+    font-size: 13px;
+    font-weight: bold;
+}
+.filters select, .filters input {
+    padding: 6px;
+    width: 100%;
+}
+button {
+    grid-column: span 4;
+    padding: 10px;
+    background: #0b5394;
+    color: white;
+    border: none;
+    font-size: 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    text-align: center;
+}
+.kpi {
+    background: #eef3f9;
+    padding: 20px;
+    border-radius: 6px;
+}
+.kpi h2 {
+    margin: 5px 0;
+    color: #0b5394;
+}
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding: 15px;
+}
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+}
+footer {
+    text-align: center;
+    font-size: 12px;
+    padding: 10px;
+    color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+SADIQ ABBASI HOSPITAL – SURGICAL AUDIT DASHBOARD
+</header>
+
+<div class="filters">
+    <div>
+        <label>OT</label>
+        <select id="ot">
+            <option>ALL OTS</option>
+            <option>MAIN OT</option>
+            <option>GYNAE OT</option>
+            <option>EMERGENCY OT</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Ward</label>
+        <select id="ward">
+            <option>ALL WARDS</option>
+            <option>GYNAE</option>
+            <option>ORTHO</option>
+            <option>SURGERY</option>
+            <option>EYE</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Gender</label>
+        <select id="gender">
+            <option>ALL GENDERS</option>
+            <option>MALE</option>
+            <option>FEMALE</option>
+            <option>TRANSGENDER</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Anaesthesia</label>
+        <select id="ana">
+            <option>ALL TYPE</option>
+            <option>LOCAL</option>
+            <option>GENERAL</option>
+            <option>SPINE</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Type</label>
+        <select id="type">
+            <option>ALL TYPES</option>
+            <option>MAJOR</option>
+            <option>MINOR</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Age Group</label>
+        <select id="ageGroup">
+            <option>ALL</option>
+            <option>Below 30 Days</option>
+            <option>1 Month to 1 Year</option>
+            <option>1 Year to 10 Years</option>
+            <option>10 to 15 Years</option>
+            <option>15 & Above</option>
+        </select>
+    </div>
+
+    <div>
+        <label>From Date</label>
+        <input type="date" id="fromDate">
+    </div>
+
+    <div>
+        <label>To Date</label>
+        <input type="date" id="toDate">
+    </div>
+
+    <button onclick="applyFilters()">Apply Filters</button>
+</div>
+
+<div class="kpis">
+    <div class="kpi">
+        <h4>Total Surgeries</h4>
+        <h2 id="totalSurgeries">0</h2>
+    </div>
+    <div class="kpi">
+        <h4>Major Surgeries</h4>
+        <h2 id="majorSurgeries">0</h2>
+    </div>
+    <div class="kpi">
+        <h4>Minor Surgeries</h4>
+        <h2 id="minorSurgeries">0</h2>
+    </div>
+</div>
+
+<div class="dashboard">
+    <div class="card"><canvas id="otChart"></canvas></div>
+    <div class="card"><canvas id="wardChart"></canvas></div>
+    <div class="card"><canvas id="genderChart"></canvas></div>
+    <div class="card"><canvas id="anaChart"></canvas></div>
+    <div class="card"><canvas id="typeChart"></canvas></div>
+</div>
+
+<footer>
+Data Source: Google Sheets | Surgical Audit Dashboard
+</footer>
+
+<script>
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
+
+let rawData = [];
+let charts = [];
+
+fetch(csvUrl)
+.then(res => res.text())
+.then(csv => {
+    const rows = csv.split("\n").slice(1);
+    rows.forEach(r => {
+        const c = r.split(",");
+        rawData.push({
+            date: new Date(c[0]),
+            OT: c[1],
+            WARD: c[2],
+            GENDER: c[3],
+            AGE: parseInt(c[4]),
+            ANA: c[5],
+            TYPE: c[6]
+        });
+    });
+    applyFilters();
+});
+
+function ageMatch(age, group) {
+    if (group === "Below 30 Days") return age < 1;
+    if (group === "1 Month to 1 Year") return age >= 1 && age < 2;
+    if (group === "1 Year to 10 Years") return age >= 2 && age <= 10;
+    if (group === "10 to 15 Years") return age > 10 && age <= 15;
+    if (group === "15 & Above") return age > 15;
+    return true;
+}
+
+function applyFilters() {
+    const v = id => document.getElementById(id).value;
+
+    const filtered = rawData.filter(d =>
+        (v("ot")==="ALL OTS" || d.OT===v("ot")) &&
+        (v("ward")==="ALL WARDS" || d.WARD===v("ward")) &&
+        (v("gender")==="ALL GENDERS" || d.GENDER===v("gender")) &&
+        (v("ana")==="ALL TYPE" || d.ANA===v("ana")) &&
+        (v("type")==="ALL TYPES" || d.TYPE===v("type")) &&
+        ageMatch(d.AGE, v("ageGroup")) &&
+        (!v("fromDate") || d.date >= new Date(v("fromDate"))) &&
+        (!v("toDate") || d.date <= new Date(v("toDate")))
+    );
+
+    document.getElementById("totalSurgeries").innerText = filtered.length;
+    document.getElementById("majorSurgeries").innerText = filtered.filter(d=>d.TYPE==="MAJOR").length;
+    document.getElementById("minorSurgeries").innerText = filtered.filter(d=>d.TYPE==="MINOR").length;
+
+    drawCharts(filtered);
+}
+
+function drawCharts(data) {
+    charts.forEach(c => c.destroy());
+    charts = [];
+
+    charts.push(makeChart("otChart","OT Wise",countBy(data,"OT")));
+    charts.push(makeChart("wardChart","Ward Wise",countBy(data,"WARD")));
+    charts.push(makeChart("genderChart","Gender Wise",countBy(data,"GENDER")));
+    charts.push(makeChart("anaChart","Anaesthesia Wise",countBy(data,"ANA")));
+    charts.push(makeChart("typeChart","Type Wise",countBy(data,"TYPE")));
+}
+
+function countBy(data,key){
+    let o={};
+    data.forEach(d=>o[d[key]]=(o[d[key]]||0)+1);
+    return o;
+}
+
+function makeChart(id,title,data){
+    return new Chart(document.getElementById(id),{
+        type:"bar",
+        data:{labels:Object.keys(data),datasets:[{data:Object.values(data)}]},
+        options:{plugins:{legend:{display:false}},responsive:true}
+    });
+}
+</script>
+
+</body>
+</html>
