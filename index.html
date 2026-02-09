@@ -1,104 +1,100 @@
-<!DOCTYPE html>
+<6th Dashboard>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>SADIQ ABBASI HOSPITAL – SURGICAL DASHBOARD</title>
 
+<!-- Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body {
-    margin: 0;
-    font-family: "Segoe UI", Arial;
-    background: #f4f7fb;
+body{
+    margin:0;
+    font-family:"Segoe UI",Arial;
+    background:#eef2f6;
 }
-header {
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    color: white;
-    text-align: center;
-    padding: 15px;
+header{
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:#fff;
+    text-align:center;
+    padding:15px;
 }
-header img {
-    height: 90px;
+header img{height:85px;}
+.container{padding:20px;}
+.filters{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:10px;
 }
-.container {
-    padding: 20px;
+label{font-weight:600;}
+select,input{
+    padding:8px;
+    border-radius:5px;
+    border:1px solid #ccc;
 }
-.filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
-    gap: 10px;
+.kpis{
+    margin-top:20px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:15px;
 }
-label {
-    font-weight: 600;
+.kpi{
+    background:#fff;
+    border-radius:10px;
+    padding:15px;
+    text-align:center;
+    box-shadow:0 4px 8px rgba(0,0,0,.1);
 }
-select, input {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+.kpi h1{
+    margin:0;
+    font-size:34px;
+    color:#203a43;
 }
-.kpis {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
-    gap: 15px;
-    margin-top: 20px;
+.kpi span{
+    font-weight:600;
+    color:#555;
 }
-.kpi {
-    background: white;
-    padding: 15px;
-    text-align: center;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,.1);
+.charts{
+    margin-top:30px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:30px;
 }
-.kpi h2 {
-    margin: 0;
-    color: #203a43;
+.chart-box{
+    width:70%;
+    background:#fff;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 4px 8px rgba(0,0,0,.1);
 }
-.charts {
-    margin-top: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
+footer{
+    background:#203a43;
+    color:#fff;
+    text-align:center;
+    padding:12px;
+    margin-top:30px;
 }
-.chart-box {
-    width: 70%;
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,.1);
+footer a{
+    color:#ffd700;
+    text-decoration:none;
 }
-footer {
-    background: #203a43;
-    color: white;
-    text-align: center;
-    padding: 12px;
-    margin-top: 30px;
+.fixed-btn{
+    position:fixed;
+    bottom:20px;
 }
-footer a {
-    color: #ffd700;
-    text-decoration: none;
-}
-.fixed-btn {
-    position: fixed;
-    bottom: 20px;
-}
-#exportBtn {
-    left: 20px;
-}
-#refreshBtn {
-    right: 20px;
-}
-button {
-    padding: 10px 15px;
-    background: #2c5364;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+#exportBtn{left:20px;}
+#refreshBtn{right:20px;}
+button{
+    padding:10px 15px;
+    background:#2c5364;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
 }
 </style>
 </head>
@@ -113,6 +109,7 @@ button {
 
 <div class="container" id="dashboard">
 
+<!-- Filters -->
 <div class="filters">
 <div><label>OT</label><select id="ot"></select></div>
 <div><label>WARD</label><select id="ward"></select></div>
@@ -123,25 +120,24 @@ button {
 <div><label>TO DATE</label><input type="date" id="toDate"></div>
 </div>
 
+<!-- KPIs (FIGURES ONLY) -->
 <div class="kpis">
-<div class="kpi"><h2 id="total">0</h2>Total Surgeries</div>
-<div class="kpi"><h2 id="male">0</h2>Male Surgeries</div>
-<div class="kpi"><h2 id="female">0</h2>Female Surgeries</div>
-<div class="kpi"><h2 id="major">0</h2>Major Surgeries</div>
-<div class="kpi"><h2 id="minor">0</h2>Minor Surgeries</div>
+<div class="kpi"><h1 id="total">0</h1><span>Total Surgeries</span></div>
+<div class="kpi"><h1 id="male">0</h1><span>Male Surgeries</span></div>
+<div class="kpi"><h1 id="female">0</h1><span>Female Surgeries</span></div>
+<div class="kpi"><h1 id="major">0</h1><span>Major Surgeries</span></div>
+<div class="kpi"><h1 id="minor">0</h1><span>Minor Surgeries</span></div>
 </div>
 
+<!-- Charts -->
 <div class="charts">
-<div class="chart-box">
-<canvas id="otChart"></canvas>
-</div>
-<div class="chart-box">
-<canvas id="wardChart"></canvas>
-</div>
+<div class="chart-box"><canvas id="otChart"></canvas></div>
+<div class="chart-box"><canvas id="wardChart"></canvas></div>
 </div>
 
 </div>
 
+<!-- Buttons -->
 <div class="fixed-btn" id="exportBtn">
 <button onclick="exportPDF()">Export to PDF</button>
 </div>
@@ -173,12 +169,12 @@ function ageGroup(age){
  return "45 Years & above";
 }
 
-function fill(id,arr){
+function fill(id,list){
  document.getElementById(id).innerHTML =
- arr.map(v=>`<option>${v}</option>`).join("");
+ list.map(v=>`<option>${v}</option>`).join("");
 }
 
-function setupFilters(){
+function initFilters(){
  fill("ot",["ALL OTS","MAIN OT","GYNAE OT","EMERGENCY OT"]);
  fill("ward",["ALL WARDS","GYNAE","ORTHO","SURGERY","EYE"]);
  fill("gender",["ALL GENDERS","MALE","FEMALE","TRANSGENDER"]);
@@ -188,7 +184,7 @@ function setupFilters(){
 }
 
 function render(){
- let f = rawData.filter(r=>{
+ let data = rawData.filter(r=>{
   if(ot.value!="ALL OTS" && r.OT!=ot.value) return false;
   if(ward.value!="ALL WARDS" && r.WARD!=ward.value) return false;
   if(gender.value!="ALL GENDERS" && r.GENDER!=gender.value) return false;
@@ -199,28 +195,25 @@ function render(){
   return true;
  });
 
- total.innerText=f.length;
- male.innerText=f.filter(x=>x.GENDER=="MALE").length;
- female.innerText=f.filter(x=>x.GENDER=="FEMALE").length;
- major.innerText=f.filter(x=>x.TYPE=="MAJOR").length;
- minor.innerText=f.filter(x=>x.TYPE=="MINOR").length;
+ total.textContent=data.length;
+ male.textContent=data.filter(d=>d.GENDER=="MALE").length;
+ female.textContent=data.filter(d=>d.GENDER=="FEMALE").length;
+ major.textContent=data.filter(d=>d.TYPE=="MAJOR").length;
+ minor.textContent=data.filter(d=>d.TYPE=="MINOR").length;
 
- barChart("otChart","OT Wise Surgeries",count(f,"OT"));
- barChart("wardChart","Ward Wise Surgeries",count(f,"WARD"));
+ drawBar("otChart","OT Wise Surgeries",group(data,"OT"));
+ drawBar("wardChart","Ward Wise Surgeries",group(data,"WARD"));
 }
 
-function count(data,key){
- return data.reduce((a,c)=>(a[c[key]]=(a[c[key]]||0)+1,a),{});
+function group(arr,key){
+ return arr.reduce((o,x)=>{o[x[key]]=(o[x[key]]||0)+1;return o;},{});
 }
 
-function barChart(id,title,data){
+function drawBar(id,title,data){
  if(charts[id]) charts[id].destroy();
  charts[id]=new Chart(document.getElementById(id),{
   type:"bar",
-  data:{
-   labels:Object.keys(data),
-   datasets:[{data:Object.values(data)}]
-  },
+  data:{labels:Object.keys(data),datasets:[{data:Object.values(data)}]},
   options:{
    plugins:{title:{display:true,text:title}},
    scales:{y:{beginAtZero:true}}
@@ -229,19 +222,19 @@ function barChart(id,title,data){
 }
 
 function exportPDF(){
- html2canvas(document.getElementById("dashboard")).then(c=>{
+ html2canvas(document.getElementById("dashboard")).then(canvas=>{
   const pdf=new jspdf.jsPDF("l","mm","a4");
-  pdf.addImage(c,"PNG",10,10,277,190);
-  pdf.save("Surgical_Dashboard.pdf");
+  pdf.addImage(canvas,"PNG",10,10,277,190);
+  pdf.save("SAH_Surgical_Dashboard.pdf");
  });
 }
 
 Papa.parse(CSV_URL,{
  download:true,
  header:true,
- complete:r=>{
-  rawData=r.data;
-  setupFilters();
+ complete:res=>{
+  rawData=res.data;
+  initFilters();
   render();
  }
 });
