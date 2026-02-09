@@ -1,4 +1,4 @@
-<!2nd Dashboard html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -25,7 +25,7 @@ body{
 .header img{
     height:80px;
     display:block;
-    margin:0 auto 5px;
+    margin:0 auto 6px;
 }
 .header h1{
     margin:0;
@@ -76,12 +76,14 @@ select,input{
     color:#0b4f6c;
 }
 .kpi p{
-    margin:3px 0 0;
+    margin:4px 0 0;
     font-size:12px;
 }
 
-.chart-box{
-    text-align:center;
+.charts{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:12px;
 }
 canvas{
     max-height:300px;
@@ -121,7 +123,7 @@ footer{
 
 <!-- HEADER -->
 <div class="header">
-    <!-- Replace logo URL if you have official monogram -->
+    <!-- Replace logo URL with official SAH monogram if available -->
     <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Emblem_of_Pakistan.svg">
     <h1>SADIQ ABBASI HOSPITAL</h1>
     <h3>Bahawalpur – Surgery Dashboard</h3>
@@ -202,9 +204,10 @@ footer{
     <div class="kpi"><h2 id="minor">0</h2><p>Minor Surgeries</p></div>
 </div>
 
-<!-- CHART -->
-<div class="card chart-box">
+<!-- CHARTS -->
+<div class="card charts">
     <canvas id="otChart"></canvas>
+    <canvas id="wardChart"></canvas>
 </div>
 
 </div>
@@ -223,7 +226,7 @@ Developed By: Software Engineer
 const sheetURL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
-let data=[], otChart;
+let data=[], otChart, wardChart;
 
 fetch(sheetURL)
 .then(r=>r.text())
@@ -267,16 +270,17 @@ function applyFilters(){
     major.textContent = filtered.filter(x=>x.TYPE==="MAJOR").length;
     minor.textContent = filtered.filter(x=>x.TYPE==="MINOR").length;
 
-    drawOTChart(filtered);
+    drawPie(filtered,"OT","OT Wise Surgeries","otChart",c=>otChart=c,otChart);
+    drawPie(filtered,"WARD","Ward Wise Surgeries","wardChart",c=>wardChart=c,wardChart);
 }
 
-function drawOTChart(rows){
+function drawPie(rows, field, title, canvasId, setter, chartRef){
     const counts={};
-    rows.forEach(r=>counts[r.OT]=(counts[r.OT]||0)+1);
+    rows.forEach(r=>counts[r[field]]=(counts[r[field]]||0)+1);
 
-    if(otChart) otChart.destroy();
+    if(chartRef) chartRef.destroy();
 
-    otChart = new Chart(document.getElementById("otChart"),{
+    const chart = new Chart(document.getElementById(canvasId),{
         type:"pie",
         data:{
             labels:Object.keys(counts).map(k=>`${k} (${counts[k]})`),
@@ -284,10 +288,11 @@ function drawOTChart(rows){
         },
         options:{
             plugins:{
-                title:{ display:true, text:"OT Wise Surgeries" }
+                title:{ display:true, text:title }
             }
         }
     });
+    setter(chart);
 }
 
 function exportPDF(){
