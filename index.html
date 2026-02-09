@@ -1,328 +1,357 @@
-<!8th DASHBOARD>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Sadiq Abbasi Hospital – OT Dashboard</title>
+<title>Sadiq Abbasi Hospital Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Libraries -->
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- html2pdf -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-/* ================= GENERAL ================= */
-:root{
-  --primary:#1e88e5;
-  --bg:#f4f6fa;
-  --card:#ffffff;
-  --text:#333;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:"Segoe UI", Arial, sans-serif;
-  background:var(--bg);
-  color:var(--text);
-}
+    body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f4f7fb;
+        margin: 0;
+        color: #222;
+    }
 
-/* ================= HEADER ================= */
-header{
-  background:#fff;
-  text-align:center;
-  padding:15px;
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
-}
-header img{height:70px}
-header h1{
-  margin:8px 0 0;
-  font-size:24px;
-  letter-spacing:1px;
-}
-header p{margin:4px 0;color:#666}
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 15px;
+        background: #fff;
+    }
 
-/* ================= LAYOUT ================= */
-.container{padding:15px}
+    /* HEADER */
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
 
-/* ================= FILTERS ================= */
-.filters{
-  background:var(--card);
-  padding:15px;
-  border-radius:10px;
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
-  gap:14px;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
-}
-.filter label{
-  font-size:13px;
-  font-weight:600;
-  display:block;
-  margin-bottom:5px;
-}
-.filter select,
-.filter input{
-  width:100%;
-  padding:8px;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
+    .header img {
+        height: 70px;
+    }
 
-/* ================= KPIs ================= */
-.kpis{
-  margin-top:20px;
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:15px;
-}
-.kpi{
-  background:var(--card);
-  padding:15px;
-  text-align:center;
-  border-radius:10px;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
-}
-.kpi h2{
-  margin:0;
-  font-size:28px;
-  color:var(--primary);
-}
-.kpi span{
-  font-weight:600;
-  color:#555;
-}
+    .title {
+        text-align: center;
+    }
 
-/* ================= CHARTS ================= */
-.charts{
-  margin-top:25px;
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-  gap:25px;
-  justify-items:center;
-}
-canvas{
-  background:#fff;
-  padding:12px;
-  border-radius:10px;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
-  max-width:100%;
-}
+    .title h1 {
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: 1px;
+    }
 
-/* ================= ACTIONS ================= */
-.actions{
-  margin-top:25px;
-  display:flex;
-  justify-content:space-between;
-}
-.actions button{
-  padding:10px 20px;
-  border:none;
-  border-radius:8px;
-  color:#fff;
-  font-size:14px;
-  cursor:pointer;
-}
-.export{background:#2e7d32}
-.refresh{background:#0277bd}
+    .title small {
+        font-size: 13px;
+        color: #555;
+    }
 
-/* ================= FOOTER ================= */
-footer{
-  margin-top:30px;
-  background:#fff;
-  text-align:center;
-  padding:12px;
-  font-size:13px;
-  box-shadow:0 -2px 6px rgba(0,0,0,.06);
-}
-footer a{
-  color:var(--primary);
-  text-decoration:none;
-  font-weight:600;
-}
+    /* FILTERS */
+    .filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
 
-/* ================= A4 PRINT ================= */
-@media print{
-  body{background:#fff}
-  header,footer{box-shadow:none}
-  .actions{display:none}
-  canvas{page-break-inside:avoid}
-  @page{
-    size:A4;
-    margin:12mm;
-  }
-}
+    .filter-box label {
+        font-weight: 600;
+        font-size: 13px;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .filter-box select,
+    .filter-box input {
+        width: 100%;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    /* KPIs */
+    .kpis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .kpi {
+        background: linear-gradient(135deg, #e3f2fd, #ffffff);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .kpi h2 {
+        margin: 0;
+        font-size: 28px;
+        color: #0d47a1;
+    }
+
+    .kpi p {
+        margin: 5px 0 0;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    /* CHARTS */
+    .charts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+        justify-items: center;
+    }
+
+    canvas {
+        max-width: 500px;
+        max-height: 350px;
+    }
+
+    /* FOOTER BUTTONS */
+    .footer-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    button {
+        padding: 10px 18px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .pdf-btn {
+        background: #1565c0;
+        color: white;
+    }
+
+    .refresh-btn {
+        background: #2e7d32;
+        color: white;
+    }
+
+    /* FOOTER */
+    footer {
+        margin-top: 25px;
+        text-align: center;
+        font-size: 13px;
+        color: #444;
+    }
+
+    footer a {
+        color: #0d47a1;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    /* PRINT */
+    @media print {
+        body {
+            background: #fff;
+        }
+        button {
+            display: none;
+        }
+    }
 </style>
 </head>
 
 <body>
+<div class="container" id="dashboard">
 
-<div id="dashboard">
+    <!-- HEADER -->
+    <div class="header">
+        <img src="https://drive.google.com/uc?export=view&id=1Y5PbMKEFDgSk9CiSZOAdVyxRyAse6hXU">
+        <div class="title">
+            <h1>SADIQ ABBASI HOSPITAL</h1>
+            <small>BAHAWALPUR</small>
+        </div>
+    </div>
 
-<header>
-  <img src="https://drive.google.com/uc?export=view&id=1Y5PbMKEFDgSk9CiSZOAdVyxRyAse6hXU">
-  <h1>SADIQ ABBASI HOSPITAL</h1>
-  <p>Bahawalpur – OT & Surgery Dashboard</p>
-</header>
+    <!-- FILTERS -->
+    <div class="filters">
+        <div class="filter-box">
+            <label>OT</label>
+            <select id="otFilter">
+                <option value="ALL">ALL OTS</option>
+                <option>MAIN OT</option>
+                <option>GYNAE OT</option>
+            </select>
+        </div>
 
-<div class="container">
+        <div class="filter-box">
+            <label>WARD</label>
+            <select id="wardFilter">
+                <option value="ALL">ALL WARDS</option>
+                <option>GYNAE</option>
+                <option>ORTHO</option>
+                <option>SURGERY</option>
+                <option>EYE</option>
+            </select>
+        </div>
 
-<!-- FILTERS -->
-<div class="filters">
-  <div class="filter">
-    <label>OT</label>
-    <select id="ot">
-      <option value="">ALL OTS</option>
-      <option>MAIN OT</option>
-      <option>GYNAE OT</option>
-      <option>EMERGENCY OT</option>
-    </select>
-  </div>
+        <div class="filter-box">
+            <label>GENDER</label>
+            <select id="genderFilter">
+                <option value="ALL">ALL GENDERS</option>
+                <option>MALE</option>
+                <option>FEMALE</option>
+                <option>TRANSGENDER</option>
+            </select>
+        </div>
 
-  <div class="filter">
-    <label>Ward</label>
-    <select id="ward">
-      <option value="">ALL WARDS</option>
-      <option>GYNAE</option>
-      <option>ORTHO</option>
-      <option>SURGERY</option>
-      <option>EYE</option>
-    </select>
-  </div>
+        <div class="filter-box">
+            <label>AGE GROUP</label>
+            <select id="ageFilter">
+                <option value="ALL">ALL AGES</option>
+                <option>Below 30 Days</option>
+                <option>1 Month to 1 Year</option>
+                <option>1 Year to 15 Years</option>
+                <option>15 to 30 Years</option>
+                <option>30 Years to 45 Years</option>
+                <option>45 Years to 60 Years</option>
+                <option>65 Years & above</option>
+            </select>
+        </div>
 
-  <div class="filter">
-    <label>Gender</label>
-    <select id="gender">
-      <option value="">ALL GENDERS</option>
-      <option>MALE</option>
-      <option>FEMALE</option>
-      <option>TRANSGENDER</option>
-    </select>
-  </div>
+        <div class="filter-box">
+            <label>SURGERY TYPE</label>
+            <select id="typeFilter">
+                <option value="ALL">ALL TYPES</option>
+                <option>MAJOR</option>
+                <option>MINOR</option>
+            </select>
+        </div>
 
-  <div class="filter">
-    <label>Age Group</label>
-    <select id="ageGroup">
-      <option value="">ALL AGES</option>
-      <option value="0-0">Below 30 Days</option>
-      <option value="1-1">1 Month to 1 Year</option>
-      <option value="2-15">1 Year to 15 Years</option>
-      <option value="15-30">15 to 30 Years</option>
-      <option value="30-45">30 to 45 Years</option>
-      <option value="45-200">45 Years & Above</option>
-    </select>
-  </div>
+        <div class="filter-box">
+            <label>FROM DATE</label>
+            <input type="date" id="fromDate">
+        </div>
 
-  <div class="filter">
-    <label>Surgery Type</label>
-    <select id="type">
-      <option value="">ALL TYPES</option>
-      <option>MAJOR</option>
-      <option>MINOR</option>
-    </select>
-  </div>
+        <div class="filter-box">
+            <label>TO DATE</label>
+            <input type="date" id="toDate">
+        </div>
+    </div>
 
-  <div class="filter">
-    <label>From Date</label>
-    <input type="date">
-  </div>
+    <!-- KPIs -->
+    <div class="kpis">
+        <div class="kpi"><h2 id="total">0</h2><p>Total Surgeries</p></div>
+        <div class="kpi"><h2 id="male">0</h2><p>Male Surgeries</p></div>
+        <div class="kpi"><h2 id="female">0</h2><p>Female Surgeries</p></div>
+        <div class="kpi"><h2 id="major">0</h2><p>Major Surgeries</p></div>
+        <div class="kpi"><h2 id="minor">0</h2><p>Minor Surgeries</p></div>
+    </div>
 
-  <div class="filter">
-    <label>To Date</label>
-    <input type="date">
-  </div>
-</div>
+    <!-- CHARTS -->
+    <div class="charts">
+        <canvas id="otChart"></canvas>
+        <canvas id="wardChart"></canvas>
+    </div>
 
-<!-- KPIs -->
-<div class="kpis">
-  <div class="kpi"><h2 id="t">0</h2><span>Total Surgeries</span></div>
-  <div class="kpi"><h2 id="m">0</h2><span>Male Surgeries</span></div>
-  <div class="kpi"><h2 id="f">0</h2><span>Female Surgeries</span></div>
-  <div class="kpi"><h2 id="maj">0</h2><span>Major Surgeries</span></div>
-  <div class="kpi"><h2 id="min">0</h2><span>Minor Surgeries</span></div>
-</div>
+    <!-- ACTIONS -->
+    <div class="footer-actions">
+        <button class="pdf-btn" onclick="exportPDF()">Export to PDF</button>
+        <button class="refresh-btn" onclick="location.reload()">Refresh</button>
+    </div>
 
-<!-- CHARTS -->
-<div class="charts">
-  <canvas id="otChart"></canvas>
-  <canvas id="wardChart"></canvas>
-</div>
-
-<!-- ACTIONS -->
-<div class="actions">
-  <button class="export" onclick="exportPDF()">Export to PDF</button>
-  <button class="refresh" onclick="location.reload()">Refresh</button>
-</div>
-
-</div>
-
-<footer>
-Developed By:
-<a href="https://www.linkedin.com/in/smus79" target="_blank">
-Software Engineer MUHAMMAD UMAIR SYED
-</a>
-(IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
-</footer>
+    <!-- FOOTER -->
+    <footer>
+        Developed By: Software Engineer
+        <a href="https://www.linkedin.com/in/smus79" target="_blank">
+            MUHAMMAD UMAIR SYED
+        </a>
+        (IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
+    </footer>
 
 </div>
 
 <script>
-const URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
-let data=[],otC,wardC;
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
-fetch(URL).then(r=>r.text()).then(t=>{
-  let rows=t.trim().split("\n");
-  let h=rows.shift().split(",");
-  data=rows.map(r=>{
-    let o={};r.split(",").forEach((v,i)=>o[h[i]]=v.trim());return o;
-  });
-  apply();
+let rawData = [];
+let otChart, wardChart;
+
+fetch(CSV_URL)
+.then(res => res.text())
+.then(csv => {
+    const rows = csv.split("\n").slice(1);
+    rawData = rows.map(r => {
+        const c = r.split(",");
+        return {
+            date: c[0],
+            ot: c[1],
+            ward: c[2],
+            gender: c[3],
+            age: c[4],
+            type: c[5]
+        };
+    });
+    applyFilters();
 });
 
-document.querySelectorAll("select").forEach(e=>e.onchange=apply);
+document.querySelectorAll("select,input").forEach(e => e.addEventListener("change", applyFilters));
 
-function apply(){
-  let f=data.filter(d=>{
-    if(ot.value&&d.OT!==ot.value)return false;
-    if(ward.value&&d.WARD!==ward.value)return false;
-    if(gender.value&&d.GENDER!==gender.value)return false;
-    if(type.value&&d.TYPE!==type.value)return false;
-    if(ageGroup.value){
-      let[a,b]=ageGroup.value.split("-").map(Number);
-      let age=Number(d.AGE||0);
-      if(age<a||age>b)return false;
-    }
-    return true;
-  });
+function applyFilters() {
+    let data = rawData.filter(d => {
+        return (otFilter.value === "ALL" || d.ot === otFilter.value) &&
+               (wardFilter.value === "ALL" || d.ward === wardFilter.value) &&
+               (genderFilter.value === "ALL" || d.gender === genderFilter.value) &&
+               (typeFilter.value === "ALL" || d.type === typeFilter.value);
+    });
 
-  t.innerText=f.length;
-  m.innerText=f.filter(x=>x.GENDER==="MALE").length;
-  f.innerText=f.filter(x=>x.GENDER==="FEMALE").length;
-  maj.innerText=f.filter(x=>x.TYPE==="MAJOR").length;
-  min.innerText=f.filter(x=>x.TYPE==="MINOR").length;
+    total.innerText = data.length;
+    male.innerText = data.filter(d => d.gender === "MALE").length;
+    female.innerText = data.filter(d => d.gender === "FEMALE").length;
+    major.innerText = data.filter(d => d.type === "MAJOR").length;
+    minor.innerText = data.filter(d => d.type === "MINOR").length;
 
-  draw("OT",f,"otChart");
-  draw("WARD",f,"wardChart");
+    drawChart("ot", data, "otChart", "OT Wise Surgeries");
+    drawChart("ward", data, "wardChart", "Ward Wise Surgeries");
 }
 
-function draw(k,a,id){
-  let c={};a.forEach(x=>c[x[k]]=(c[x[k]]||0)+1);
-  let ctx=document.getElementById(id);
-  if(id==="otChart"&&otC)otC.destroy();
-  if(id==="wardChart"&&wardC)wardC.destroy();
-  let ch=new Chart(ctx,{
-    type:"bar",
-    data:{labels:Object.keys(c),datasets:[{data:Object.values(c),
-    backgroundColor:["#42a5f5","#66bb6a","#ffa726","#ab47bc","#ef5350"]}]},
-    options:{plugins:{legend:{display:false}},responsive:true}
-  });
-  id==="otChart"?otC=ch:wardC=ch;
+function drawChart(field, data, canvasId, title) {
+    const counts = {};
+    data.forEach(d => counts[d[field]] = (counts[d[field]] || 0) + 1);
+
+    if (window[canvasId]) window[canvasId].destroy();
+
+    window[canvasId] = new Chart(document.getElementById(canvasId), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(counts),
+            datasets: [{
+                label: title,
+                data: Object.values(counts),
+                backgroundColor: ['#42a5f5','#66bb6a','#ffa726','#ab47bc']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
 }
 
-function exportPDF(){
-  html2pdf().from(document.getElementById("dashboard"))
-  .set({filename:"SAH_OT_Dashboard_A4.pdf"})
-  .save();
+function exportPDF() {
+    html2pdf().from(document.getElementById("dashboard")).save("Hospital_Dashboard.pdf");
 }
 </script>
-
 </body>
 </html>
