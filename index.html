@@ -1,4 +1,4 @@
-<!6th DASHBOARD>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -221,12 +221,12 @@ button {
             <label>Age Group</label>
             <select id="ageFilter">
                 <option value="">ALL AGES</option>
-                <option value="0-1">Below 30 Days</option>
-                <option value="1-12">1 Month to 1 Year</option>
+                <option value="0-0.083">Below 30 Days</option>
+                <option value="0.083-1">1 Month to 1 Year</option>
                 <option value="1-15">1 Year to 15 Years</option>
                 <option value="15-30">15 to 30 Years</option>
                 <option value="30-45">30 to 45 Years</option>
-                <option value="45+">45 Years & Above</option>
+                <option value="45-200">45 Years & Above</option>
             </select>
         </div>
 
@@ -241,12 +241,12 @@ button {
 
         <div class="filter-box">
             <label>From Date</label>
-            <input type="date">
+            <input type="date" id="fromDate">
         </div>
 
         <div class="filter-box">
             <label>To Date</label>
-            <input type="date">
+            <input type="date" id="toDate">
         </div>
     </div>
 
@@ -297,17 +297,33 @@ Papa.parse(csvUrl, {
     }
 });
 
-document.querySelectorAll("select").forEach(e => e.addEventListener("change", updateDashboard));
+document.querySelectorAll("select, input[type=date]").forEach(e => e.addEventListener("change", updateDashboard));
 
 let otChart, wardChart;
 
 function updateDashboard() {
-    let data = rawData.filter(r =>
-        (!otFilter.value || r.OT === otFilter.value) &&
-        (!wardFilter.value || r.WARD === wardFilter.value) &&
-        (!genderFilter.value || r.GENDER === genderFilter.value) &&
-        (!typeFilter.value || r.TYPE === typeFilter.value)
-    );
+    const fromDate = document.getElementById("fromDate").value ? new Date(document.getElementById("fromDate").value) : null;
+    const toDate = document.getElementById("toDate").value ? new Date(document.getElementById("toDate").value) : null;
+    const ageRange = document.getElementById("ageFilter").value.split("-").map(Number);
+
+    const data = rawData.filter(r => {
+        if (document.getElementById("otFilter").value && r.OT !== document.getElementById("otFilter").value) return false;
+        if (document.getElementById("wardFilter").value && r.WARD !== document.getElementById("wardFilter").value) return false;
+        if (document.getElementById("genderFilter").value && r.GENDER !== document.getElementById("genderFilter").value) return false;
+        if (document.getElementById("typeFilter").value && r.TYPE !== document.getElementById("typeFilter").value) return false;
+
+        // Date Filter
+        if (fromDate && new Date(r.DATE) < fromDate) return false;
+        if (toDate && new Date(r.DATE) > toDate) return false;
+
+        // Age Filter
+        if (ageRange.length === 2 && r.AGE) {
+            const age = parseFloat(r.AGE); // AGE in years (can be decimal for months)
+            if (age < ageRange[0] || age > ageRange[1]) return false;
+        }
+
+        return true;
+    });
 
     total.innerText = data.length;
     male.innerText = data.filter(r => r.GENDER === "MALE").length;
@@ -320,8 +336,10 @@ function updateDashboard() {
 }
 
 function group(data, key) {
-    let g = {};
-    data.forEach(r => g[r[key]] = (g[r[key]] || 0) + 1);
+    const g = {};
+    data.forEach(r => {
+        if (r[key]) g[r[key]] = (g[r[key]] || 0) + 1;
+    });
     return g;
 }
 
