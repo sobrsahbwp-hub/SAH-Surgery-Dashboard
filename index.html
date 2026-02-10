@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!FINAL TEST DASHBOARD CODE>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -147,6 +147,7 @@ button {
     background: #2563eb;
     color: #fff;
 }
+
 /* ===== Improved Mobile Responsiveness ===== */
 @media (max-width: 768px) {
 
@@ -426,11 +427,78 @@ function drawChart(id, data, chart, setChart) {
 }
 
 function exportPDF() {
-    html2pdf().from(document.getElementById("dashboard")).save("Hospital_Dashboard.pdf");
+    const element = document.getElementById("dashboard");
+
+    const opt = {
+        margin: [25, 10, 20, 10], // extra top & bottom for header/footer
+        filename: 'Hospital_Dashboard_A4.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            scrollY: 0,
+            windowWidth: element.scrollWidth
+        },
+        jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    html2pdf()
+        .set(opt)
+        .from(element)
+        .toPdf()
+        .get('pdf')
+        .then(function (pdf) {
+
+            const pageCount = pdf.internal.getNumberOfPages();
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+
+            const today = new Date().toLocaleDateString();
+
+            for (let i = 1; i <= pageCount; i++) {
+                pdf.setPage(i);
+
+                /* ===== HEADER ===== */
+                pdf.setFontSize(12);
+                pdf.setTextColor(30, 58, 138); // blue
+                pdf.text(
+                    "SADIQ ABBASI HOSPITAL, BAHAWALPUR",
+                    pageWidth / 2,
+                    12,
+                    { align: "center" }
+                );
+
+                pdf.setDrawColor(200);
+                pdf.line(10, 15, pageWidth - 10, 15);
+
+                /* ===== FOOTER ===== */
+                pdf.setDrawColor(200);
+                pdf.line(10, pageHeight - 15, pageWidth - 10, pageHeight - 15);
+
+                pdf.setFontSize(9);
+                pdf.setTextColor(100);
+                pdf.text(
+                    `Generated on: ${today}`,
+                    10,
+                    pageHeight - 8
+                );
+
+                pdf.text(
+                    `Page ${i} of ${pageCount}`,
+                    pageWidth - 10,
+                    pageHeight - 8,
+                    { align: "right" }
+                );
+            }
+        })
+        .save();
 }
 </script>
 
 </body>
 </html>
-
-
