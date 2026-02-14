@@ -25,15 +25,13 @@ header{
 }
 header h1{
     margin:0;
-    font-size:22px;
-    letter-spacing:1px;
+    font-size:20px;
 }
 #clock{
     position:absolute;
     right:20px;
     top:20px;
-    font-size:14px;
-    text-align:right;
+    font-size:13px;
     font-weight:600;
 }
 .container{
@@ -56,9 +54,9 @@ header h1{
 }
 .kpis{
     display:grid;
-    grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+    grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
     gap:15px;
-    margin-bottom:20px;
+    margin-bottom:25px;
 }
 .kpi{
     background:white;
@@ -73,18 +71,23 @@ header h1{
 }
 .charts{
     display:grid;
-    grid-template-columns:1fr;
-    gap:30px;
+    grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+    gap:20px;
 }
-canvas{
+.chart-box{
     background:white;
     padding:15px;
-    border-radius:8px;
+    border-radius:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+    height:350px;
+}
+.chart-box canvas{
+    height:100% !important;
 }
 .buttons{
     display:flex;
     justify-content:space-between;
-    margin-top:20px;
+    margin-top:25px;
 }
 footer{
     text-align:center;
@@ -92,8 +95,10 @@ footer{
     background:white;
     margin-top:20px;
 }
-@media print{
-    body{background:white;}
+@media(max-width:768px){
+    .chart-box{
+        height:300px;
+    }
 }
 </style>
 </head>
@@ -140,20 +145,6 @@ footer{
 </div>
 
 <div>
-<label>Age Group</label>
-<select id="ageFilter">
-<option>ALL</option>
-<option>Below 30 Days</option>
-<option>1 Month to 1 Year</option>
-<option>1 Year to 15 Years</option>
-<option>15 to 30 Years</option>
-<option>30 Years to 45 Years</option>
-<option>45 Years to 60 Years</option>
-<option>65 Years & above</option>
-</select>
-</div>
-
-<div>
 <label>Surgery Type</label>
 <select id="typeFilter">
 <option>ALL TYPES</option>
@@ -171,27 +162,26 @@ footer{
 <label>To Date</label>
 <input type="date" id="toDate">
 </div>
-
 </div>
 
-<!-- KPI SECTION -->
+<!-- KPIs -->
 <div class="kpis">
 <div class="kpi"><div>Total Surgeries</div><h2 id="totalKPI">0</h2></div>
 <div class="kpi"><div>Male</div><h2 id="maleKPI">0</h2></div>
 <div class="kpi"><div>Female</div><h2 id="femaleKPI">0</h2></div>
 <div class="kpi"><div>Major</div><h2 id="majorKPI">0</h2></div>
 <div class="kpi"><div>Minor</div><h2 id="minorKPI">0</h2></div>
-<div class="kpi"><div>Local Anaesthesia</div><h2 id="localKPI">0</h2></div>
-<div class="kpi"><div>Spinal Anaesthesia</div><h2 id="spinalKPI">0</h2></div>
-<div class="kpi"><div>General Anaesthesia</div><h2 id="generalKPI">0</h2></div>
+<div class="kpi"><div>Local</div><h2 id="localKPI">0</h2></div>
+<div class="kpi"><div>Spinal</div><h2 id="spinalKPI">0</h2></div>
+<div class="kpi"><div>General</div><h2 id="generalKPI">0</h2></div>
 </div>
 
 <!-- CHARTS -->
 <div class="charts">
-<canvas id="otChart"></canvas>
-<canvas id="wardChart"></canvas>
-<canvas id="typeChart"></canvas>
-<canvas id="anaChart"></canvas>
+<div class="chart-box"><canvas id="otChart"></canvas></div>
+<div class="chart-box"><canvas id="wardChart"></canvas></div>
+<div class="chart-box"><canvas id="typeChart"></canvas></div>
+<div class="chart-box"><canvas id="anaChart"></canvas></div>
 </div>
 
 <div class="buttons">
@@ -214,18 +204,31 @@ MUHAMMAD UMAIR SYED
 const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
 let rawData=[];
-let otChart,wardChart,typeChart,anaChart;
 
 Papa.parse(sheetURL,{
 download:true,
 header:true,
+skipEmptyLines:true,
 complete:function(results){
 rawData=results.data;
 applyFilters();
 }
 });
 
+function parseDate(dateStr){
+if(!dateStr) return null;
+
+// Handle different formats
+if(dateStr.includes("/")){
+let parts=dateStr.split("/");
+if(parts[2].length===4)
+return new Date(parts[2],parts[1]-1,parts[0]);
+}
+return new Date(dateStr);
+}
+
 function applyFilters(){
+
 let data=rawData;
 
 const ot=document.getElementById("otFilter").value;
@@ -236,17 +239,19 @@ const from=document.getElementById("fromDate").value;
 const to=document.getElementById("toDate").value;
 
 data=data.filter(r=>{
-let condition=true;
 
-if(ot!=="ALL OTS") condition&=(r["OT"]===ot);
-if(ward!=="ALL WARDS") condition&=(r["WARD"]===ward);
-if(gender!=="ALL GENDERS") condition&=(r["GENDER"]===gender);
-if(type!=="ALL TYPES") condition&=(r["TYPE"]===type);
+let recordDate=parseDate(r["Date"]);
+let fromDate=from? new Date(from):null;
+let toDate=to? new Date(to):null;
 
-if(from) condition&=(new Date(r["Date"])>=new Date(from));
-if(to) condition&=(new Date(r["Date"])<=new Date(to));
-
-return condition;
+return(
+(ot==="ALL OTS" || r["OT"]===ot) &&
+(ward==="ALL WARDS" || r["WARD"]===ward) &&
+(gender==="ALL GENDERS" || r["GENDER"]===gender) &&
+(type==="ALL TYPES" || r["TYPE"]===type) &&
+(!fromDate || recordDate>=fromDate) &&
+(!toDate || recordDate<=toDate)
+);
 });
 
 updateDashboard(data);
@@ -274,9 +279,9 @@ createChart("anaChart",countBy(data,"ANAESTHESIA"));
 }
 
 function countBy(data,key){
-const obj={};
+let obj={};
 data.forEach(r=>{
-let val=r[key];
+let val=r[key]||"Unknown";
 obj[val]=(obj[val]||0)+1;
 });
 return obj;
@@ -300,6 +305,7 @@ backgroundColor:[
 },
 options:{
 responsive:true,
+maintainAspectRatio:false,
 plugins:{legend:{display:false}},
 scales:{y:{beginAtZero:true}}
 }
