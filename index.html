@@ -5,7 +5,9 @@
 <title>Sadiq Abbasi Hospital – Surgery Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -19,35 +21,15 @@ select,input{padding:7px;border-radius:6px;border:1px solid #cbd5e1}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin:20px}
 .kpi{background:#fff;padding:18px;border-radius:10px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.05)}
 .kpi h2{margin:5px 0;color:#2563eb}
-
-/* ⭐ MEDIUM PROFESSIONAL CHART SIZE */
-.chart-box{
-width:85%;
-max-width:750px;
-height:360px;
-margin:25px auto;
-background:#fff;
-padding:20px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,.05);
-}
-
-.chart-box canvas{
-width:100% !important;
-height:100% !important;
-}
-
+.chart-box{width:85%;max-width:750px;height:360px;margin:25px auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.chart-box canvas{width:100%!important;height:100%!important}
 .buttons{display:flex;justify-content:space-between;padding:20px}
 button{padding:8px 16px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer}
 footer{text-align:center;padding:15px;background:#fff;margin-top:20px;font-size:13px}
-
-@media print{
-.filters,.buttons,.clock{display:none}
-body{background:#fff}
-.chart-box{height:300px}
-}
+@media print{.filters,.buttons,.clock{display:none}body{background:#fff}}
 </style>
 </head>
+
 <body>
 
 <div class="header">
@@ -57,42 +39,12 @@ body{background:#fff}
 </div>
 
 <div class="filters">
-<div class="filter-box"><label>OT</label>
-<select id="otFilter">
-<option>ALL OTS</option>
-<option>MAIN OT</option>
-<option>GYNAE OT</option>
-</select></div>
-
-<div class="filter-box"><label>WARD</label>
-<select id="wardFilter">
-<option>ALL WARDS</option>
-<option>GYNAE</option>
-<option>ORTHO</option>
-<option>SURGERY</option>
-<option>EYE</option>
-</select></div>
-
-<div class="filter-box"><label>Gender</label>
-<select id="genderFilter">
-<option>ALL GENDERS</option>
-<option>MALE</option>
-<option>FEMALE</option>
-<option>TRANSGENDER</option>
-</select></div>
-
-<div class="filter-box"><label>Surgery Type</label>
-<select id="typeFilter">
-<option>ALL TYPES</option>
-<option>MAJOR</option>
-<option>MINOR</option>
-</select></div>
-
-<div class="filter-box"><label>From Date</label>
-<input type="date" id="fromDate"></div>
-
-<div class="filter-box"><label>To Date</label>
-<input type="date" id="toDate"></div>
+<div class="filter-box"><label>OT</label><select id="otFilter"></select></div>
+<div class="filter-box"><label>WARD</label><select id="wardFilter"></select></div>
+<div class="filter-box"><label>Gender</label><select id="genderFilter"></select></div>
+<div class="filter-box"><label>Surgery Type</label><select id="typeFilter"></select></div>
+<div class="filter-box"><label>From Date</label><input type="date" id="fromDate"></div>
+<div class="filter-box"><label>To Date</label><input type="date" id="toDate"></div>
 </div>
 
 <div class="kpis">
@@ -123,20 +75,141 @@ Software Engineer MUHAMMAD UMAIR SYED
 
 <script>
 
-/* ONLY CHART SETTINGS UPDATED */
-function createOptions(){
-return{
+// 🔵 PASTE YOUR GOOGLE SHEET CSV LINK HERE
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
+
+let fullData = [];
+let otChart, typeChart, anaesthesiaChart;
+
+/* ================= FETCH DATA ================= */
+Papa.parse(SHEET_URL, {
+download: true,
+header: true,
+complete: function(results) {
+fullData = results.data.filter(row => row.Date);
+initializeFilters();
+applyFilters();
+}
+});
+
+/* ================= FILTER INIT ================= */
+function initializeFilters(){
+populateSelect("otFilter", "OT");
+populateSelect("wardFilter", "Ward");
+populateSelect("genderFilter", "Gender");
+populateSelect("typeFilter", "Type");
+
+document.querySelectorAll("select,input").forEach(el =>
+el.addEventListener("change", applyFilters));
+}
+
+function populateSelect(id, column){
+let select = document.getElementById(id);
+let values = [...new Set(fullData.map(r => r[column]).filter(Boolean))];
+select.innerHTML = `<option value="ALL">ALL</option>`;
+values.forEach(v => select.innerHTML += `<option>${v}</option>`);
+}
+
+/* ================= FILTER LOGIC ================= */
+function applyFilters(){
+let filtered = fullData.filter(row => {
+
+let date = new Date(row.Date);
+let from = document.getElementById("fromDate").value;
+let to = document.getElementById("toDate").value;
+
+if(from && date < new Date(from)) return false;
+if(to && date > new Date(to)) return false;
+
+if(matchFilter("otFilter","OT",row) &&
+matchFilter("wardFilter","Ward",row) &&
+matchFilter("genderFilter","Gender",row) &&
+matchFilter("typeFilter","Type",row))
+return true;
+
+return false;
+});
+
+updateKPIs(filtered);
+updateCharts(filtered);
+}
+
+function matchFilter(filterId, column, row){
+let val = document.getElementById(filterId).value;
+return val === "ALL" || row[column] === val;
+}
+
+/* ================= KPI UPDATE ================= */
+function updateKPIs(data){
+
+document.getElementById("total").innerText = data.length;
+document.getElementById("major").innerText = data.filter(r=>r.Type==="MAJOR").length;
+document.getElementById("minor").innerText = data.filter(r=>r.Type==="MINOR").length;
+document.getElementById("localA").innerText = data.filter(r=>r.Anaesthesia==="LOCAL").length;
+document.getElementById("spinalA").innerText = data.filter(r=>r.Anaesthesia==="SPINAL").length;
+document.getElementById("generalA").innerText = data.filter(r=>r.Anaesthesia==="GENERAL").length;
+
+}
+
+/* ================= CHART UPDATE ================= */
+function updateCharts(data){
+
+updateChart("OT", data, otChart, "otChart");
+updateChart("Type", data, typeChart, "typeChart");
+updateChart("Anaesthesia", data, anaesthesiaChart, "anaesthesiaChart");
+
+}
+
+function updateChart(column, data, chartVar, canvasId){
+
+let counts = {};
+data.forEach(r => counts[r[column]] = (counts[r[column]]||0)+1);
+
+let labels = Object.keys(counts);
+let values = Object.values(counts);
+
+if(window[canvasId]){
+window[canvasId].destroy();
+}
+
+window[canvasId] = new Chart(document.getElementById(canvasId),{
+type:'bar',
+data:{
+labels:labels,
+datasets:[{
+data:values,
+backgroundColor:[
+"#2563eb","#16a34a","#dc2626",
+"#f59e0b","#9333ea","#0ea5e9"
+]
+}]
+},
+options:{
 responsive:true,
 maintainAspectRatio:false,
-plugins:{
-legend:{position:'bottom'}
+plugins:{legend:{display:false}}
 }
-};
+});
 }
 
-/* Replace your existing chart creation options with createOptions() */
+/* ================= CLOCK ================= */
+function updateClock(){
+let now = new Date();
+document.getElementById("clock").innerText =
+now.toLocaleString();
+}
+setInterval(updateClock,1000);
+
+/* ================= PDF EXPORT ================= */
+function exportPDF(){
+html2canvas(document.body).then(canvas=>{
+const { jsPDF } = window.jspdf;
+let pdf = new jsPDF('p','mm','a4');
+pdf.addImage(canvas.toDataURL("image/png"),"PNG",5,5,200,280);
+pdf.save("Surgery_Dashboard.pdf");
+});
+}
 
 </script>
-
 </body>
 </html>
