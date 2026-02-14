@@ -10,29 +10,39 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{margin:0;font-family:Segoe UI;background:#f4f7fc;color:#222;}
-header{background:white;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.08);position:relative;}
+body{margin:0;font-family:Segoe UI;background:#f2f6fb;color:#222;}
+header{background:#fff;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.08);position:relative;}
 header h1{margin:0;color:#002855;font-size:22px;}
-header h2{margin:5px 0 0;font-weight:500;font-size:14px;color:#555;}
+header h2{margin:4px 0 0;font-weight:500;font-size:14px;color:#555;}
 #clock{position:absolute;right:20px;top:20px;font-weight:600;color:#002855;}
+
 .container{max-width:1400px;margin:auto;padding:20px;}
 .filters{display:flex;flex-wrap:wrap;gap:15px;justify-content:center;margin-bottom:25px;}
 .filter{display:flex;flex-direction:column;min-width:160px;}
-.filter label{font-weight:600;font-size:13px;margin-bottom:4px;}
+.filter label{font-weight:600;font-size:13px;margin-bottom:5px;}
 select,input{padding:7px;border-radius:6px;border:1px solid #ccc;}
+
 .kpis{text-align:center;margin-bottom:20px;}
 .kpi-large{font-size:30px;font-weight:bold;color:#002855;margin-bottom:15px;}
 .kpi-row{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px;}
-.kpi{background:white;padding:10px 18px;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,0.08);min-width:170px;font-weight:600;}
-.summary{background:white;padding:15px;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,0.08);margin-bottom:25px;font-size:14px;line-height:1.6;}
+.kpi{background:#fff;padding:10px 18px;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,.08);min-width:170px;font-weight:600;}
+
+.summary{background:#fff;padding:15px;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,.08);margin-bottom:25px;font-size:14px;line-height:1.6;}
+
 .charts{display:flex;flex-wrap:wrap;justify-content:center;gap:30px;}
-.chart-box{width:420px;height:320px;background:white;padding:15px;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,0.08);}
+.chart-box{width:420px;height:320px;background:#fff;padding:15px;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,.08);}
 canvas{width:100%!important;height:100%!important;}
+
 .buttons{display:flex;justify-content:space-between;margin-top:25px;}
 button{padding:8px 14px;border:none;border-radius:6px;background:#002855;color:white;cursor:pointer;}
 button:hover{background:#004a99;}
-.footer{text-align:center;padding:12px;background:white;margin-top:30px;font-size:13px;}
-@media print{.filters,.charts,button,#clock{display:none;}body{background:white;}}
+
+.footer{text-align:center;padding:12px;background:#fff;margin-top:30px;font-size:13px;}
+
+@media print{
+.filters,.charts,button,#clock{display:none;}
+body{background:#fff;}
+}
 </style>
 </head>
 
@@ -47,10 +57,17 @@ button:hover{background:#004a99;}
 <div class="container">
 
 <div class="filters">
-<div class="filter"><label>OT</label><select id="otFilter"><option>ALL OTS</option><option>MAIN OT</option><option>GYNAE OT</option></select></div>
-<div class="filter"><label>WARD</label><select id="wardFilter"><option>ALL WARDS</option><option>GYNAE</option><option>ORTHO</option><option>SURGERY</option><option>EYE</option></select></div>
-<div class="filter"><label>Gender</label><select id="genderFilter"><option>ALL GENDERS</option><option>MALE</option><option>FEMALE</option><option>TRANSGENDER</option></select></div>
-<div class="filter"><label>Age Group</label><select id="ageFilter">
+<div class="filter"><label>OT</label>
+<select id="otFilter"><option>ALL OTS</option><option>MAIN OT</option><option>GYNAE OT</option></select></div>
+
+<div class="filter"><label>WARD</label>
+<select id="wardFilter"><option>ALL WARDS</option><option>GYNAE</option><option>ORTHO</option><option>SURGERY</option><option>EYE</option></select></div>
+
+<div class="filter"><label>Gender</label>
+<select id="genderFilter"><option>ALL GENDERS</option><option>MALE</option><option>FEMALE</option><option>TRANSGENDER</option></select></div>
+
+<div class="filter"><label>Age Group</label>
+<select id="ageFilter">
 <option>ALL</option>
 <option>Below 30 Days</option>
 <option>1 Month to 1 Year</option>
@@ -60,7 +77,10 @@ button:hover{background:#004a99;}
 <option>45 Years to 60 Years</option>
 <option>65 Years & above</option>
 </select></div>
-<div class="filter"><label>Surgery Type</label><select id="typeFilter"><option>ALL TYPES</option><option>MAJOR</option><option>MINOR</option></select></div>
+
+<div class="filter"><label>Surgery Type</label>
+<select id="typeFilter"><option>ALL TYPES</option><option>MAJOR</option><option>MINOR</option></select></div>
+
 <div class="filter"><label>From Date</label><input type="date" id="fromDate"></div>
 <div class="filter"><label>To Date</label><input type="date" id="toDate"></div>
 </div>
@@ -110,12 +130,12 @@ rawData=res.data.map(r=>{
 return{
 OT:(r["OT"]||"").trim().toUpperCase(),
 WARD:(r["WARD"]||"").trim().toUpperCase(),
-DATE:(r["Date"]||"").trim(),
+DATE:r["Date"]||"",
 GENDER:(r["GENDER"]||"").trim().toUpperCase(),
 AGE:parseFloat(r["AGE"]),
 ANA:(r["ANAESTHESIA"]||"").trim().toUpperCase(),
 TYPE:(r["TYPE"]||"").trim().toUpperCase()
-}
+};
 });
 applyFilters();
 }
@@ -123,18 +143,27 @@ applyFilters();
 
 document.querySelectorAll("select,input").forEach(e=>e.addEventListener("change",applyFilters));
 
-function parseDate(str){
+function dateToNumberMMDDYYYY(str){
 if(!str) return null;
-let p=str.split("/");
-if(p.length!==3) return null;
-return new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1]));
+let parts=str.split("/");
+if(parts.length!==3) return null;
+let mm=parts[0].padStart(2,'0');
+let dd=parts[1].padStart(2,'0');
+let yyyy=parts[2];
+return parseInt(yyyy+mm+dd);
+}
+
+function inputDateToNumber(str){
+if(!str) return null;
+let parts=str.split("-");
+return parseInt(parts[0]+parts[1]+parts[2]);
 }
 
 function ageMatch(age,group){
 if(!age && age!==0) return true;
 switch(group){
-case "Below 30 Days": return age<1/12;
-case "1 Month to 1 Year": return age>=1/12 && age<1;
+case "Below 30 Days": return age<0.1;
+case "1 Month to 1 Year": return age>=0.1 && age<1;
 case "1 Year to 15 Years": return age>=1 && age<=15;
 case "15 to 30 Years": return age>15 && age<=30;
 case "30 Years to 45 Years": return age>30 && age<=45;
@@ -145,20 +174,23 @@ default:return true;
 }
 
 function applyFilters(){
-let from=document.getElementById("fromDate").value;
-let to=document.getElementById("toDate").value;
-let fromDate=from?new Date(from+"T00:00:00"):null;
-let toDate=to?new Date(to+"T23:59:59"):null;
+
+let fromNum=inputDateToNumber(document.getElementById("fromDate").value);
+let toNum=inputDateToNumber(document.getElementById("toDate").value);
 
 let filtered=rawData.filter(r=>{
-let d=parseDate(r.DATE);
-if(fromDate && d && d<fromDate) return false;
-if(toDate && d && d>toDate) return false;
+
+let rowDateNum=dateToNumberMMDDYYYY(r.DATE);
+
+if(fromNum && rowDateNum && rowDateNum<fromNum) return false;
+if(toNum && rowDateNum && rowDateNum>toNum) return false;
+
 if(document.getElementById("otFilter").value!="ALL OTS" && r.OT!=document.getElementById("otFilter").value) return false;
 if(document.getElementById("wardFilter").value!="ALL WARDS" && r.WARD!=document.getElementById("wardFilter").value) return false;
 if(document.getElementById("genderFilter").value!="ALL GENDERS" && r.GENDER!=document.getElementById("genderFilter").value) return false;
 if(document.getElementById("typeFilter").value!="ALL TYPES" && r.TYPE!=document.getElementById("typeFilter").value) return false;
 if(document.getElementById("ageFilter").value!="ALL" && !ageMatch(r.AGE,document.getElementById("ageFilter").value)) return false;
+
 return true;
 });
 
@@ -167,7 +199,7 @@ updateDashboard(filtered);
 
 function countBy(data,key){
 let obj={};
-data.forEach(r=>{let v=r[key]; if(v) obj[v]=(obj[v]||0)+1;});
+data.forEach(r=>{if(r[key]) obj[r[key]]=(obj[r[key]]||0)+1;});
 return obj;
 }
 
@@ -176,46 +208,37 @@ function updateDashboard(data){
 document.getElementById("totalKPI").innerText="TOTAL SURGERIES: "+data.length;
 
 let g=countBy(data,"GENDER");
+let t=countBy(data,"TYPE");
+let a=countBy(data,"ANA");
+
 document.getElementById("maleKPI").innerText="Male: "+(g["MALE"]||0);
 document.getElementById("femaleKPI").innerText="Female: "+(g["FEMALE"]||0);
-
-let t=countBy(data,"TYPE");
 document.getElementById("majorKPI").innerText="Major: "+(t["MAJOR"]||0);
 document.getElementById("minorKPI").innerText="Minor: "+(t["MINOR"]||0);
-
-let a=countBy(data,"ANA");
 document.getElementById("localKPI").innerText="Local: "+(a["LOCAL"]||0);
 document.getElementById("spinalKPI").innerText="Spinal: "+(a["SPINAL"]||0);
 document.getElementById("generalKPI").innerText="General: "+(a["GENERAL"]||0);
 
 generateExecutiveSummary(data,g,t,a);
 
-drawChart("otChart",countBy(data,"OT"),"OT Wise");
-drawChart("wardChart",countBy(data,"WARD"),"Ward Wise");
-drawChart("typeChart",t,"Major / Minor");
-drawChart("anaChart",a,"Anaesthesia Type");
+drawChart("otChart",countBy(data,"OT"));
+drawChart("wardChart",countBy(data,"WARD"));
+drawChart("typeChart",t);
+drawChart("anaChart",a);
 }
 
 function generateExecutiveSummary(data,g,t,a){
 let total=data.length;
-let dominantOT=Object.entries(countBy(data,"OT")).sort((a,b)=>b[1]-a[1])[0];
-let dominantWard=Object.entries(countBy(data,"WARD")).sort((a,b)=>b[1]-a[1])[0];
-
-let summary=`During the selected reporting period, a total of ${total} surgical procedures were performed. 
-Major surgeries accounted for ${t["MAJOR"]||0} cases while minor procedures totaled ${t["MINOR"]||0}. 
-Gender distribution shows ${g["MALE"]||0} male and ${g["FEMALE"]||0} female patients. 
-The most utilized operation theatre was ${dominantOT?dominantOT[0]:"N/A"} and the highest surgical load was observed in ${dominantWard?dominantWard[0]:"N/A"} ward. 
-Anaesthesia utilization indicates Local (${a["LOCAL"]||0}), Spinal (${a["SPINAL"]||0}) and General (${a["GENERAL"]||0}) techniques were administered based on clinical indication. 
-This analysis reflects current surgical workload distribution and operational performance indicators for hospital administration review.`;
-
+let topOT=Object.entries(countBy(data,"OT")).sort((a,b)=>b[1]-a[1])[0];
+let summary=`During the selected period, ${total} surgical procedures were conducted. Major surgeries accounted for ${t["MAJOR"]||0} cases, while minor procedures totaled ${t["MINOR"]||0}. Gender distribution included ${g["MALE"]||0} male and ${g["FEMALE"]||0} female patients. The highest operative load was observed in ${topOT?topOT[0]:"N/A"} OT. Anaesthesia utilization comprised Local (${a["LOCAL"]||0}), Spinal (${a["SPINAL"]||0}), and General (${a["GENERAL"]||0}) techniques. This summary reflects operative workload trends and resource utilization for administrative evaluation.`;
 document.getElementById("executiveSummary").innerText=summary;
 }
 
-function drawChart(id,data,title){
+function drawChart(id,data){
 if(charts[id]) charts[id].destroy();
 charts[id]=new Chart(document.getElementById(id),{
 type:"bar",
-data:{labels:Object.keys(data),datasets:[{label:title,data:Object.values(data),
+data:{labels:Object.keys(data),datasets:[{data:Object.values(data),
 backgroundColor:["#003f88","#2a9d8f","#e76f51","#6a4c93","#ffb703","#0077b6"]}]},
 options:{plugins:{legend:{display:false}},responsive:true,maintainAspectRatio:false}
 });
