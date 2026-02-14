@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>SADIQ ABBASI HOSPITAL - Surgery Dashboard</title>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -10,14 +11,15 @@
 body{
     font-family: 'Segoe UI', sans-serif;
     margin:0;
-    background:#f4f8fb;
-    color:#222;
+    background:#f4f9fd;
+    color:#1a1a1a;
 }
 header{
     text-align:center;
     padding:20px;
     font-size:22px;
-    font-weight:bold;
+    font-weight:700;
+    position:relative;
 }
 #clock{
     position:absolute;
@@ -36,27 +38,32 @@ header{
 .filter-box{
     display:flex;
     flex-direction:column;
-    min-width:150px;
+    min-width:160px;
+}
+label{
+    font-weight:600;
+    margin-bottom:4px;
 }
 select,input{
     padding:6px;
     border:1px solid #ccc;
-    border-radius:5px;
+    border-radius:6px;
 }
 .kpis{
     text-align:center;
-    padding:10px;
+    padding:15px;
 }
 .kpi-big{
-    font-size:36px;
-    font-weight:bold;
+    font-size:38px;
+    font-weight:800;
     color:#0077cc;
 }
 .kpi-row{
     display:flex;
     justify-content:center;
-    gap:40px;
+    gap:50px;
     margin-top:10px;
+    flex-wrap:wrap;
 }
 .kpi{
     font-size:16px;
@@ -64,13 +71,13 @@ select,input{
 }
 .chart-row{
     display:flex;
-    flex-wrap:wrap;
     justify-content:center;
     gap:40px;
-    margin:20px 0;
+    flex-wrap:wrap;
+    margin:25px 0;
 }
 canvas{
-    max-width:450px;
+    max-width:350px;
 }
 .buttons{
     display:flex;
@@ -79,15 +86,18 @@ canvas{
 }
 footer{
     text-align:center;
-    padding:10px;
+    padding:12px;
     font-size:13px;
-    background:#e9eef3;
-}
-@media print{
-    body{width:210mm;height:297mm;}
+    background:#e8f1f8;
 }
 @media(max-width:768px){
     .chart-row{flex-direction:column;align-items:center;}
+}
+@media print{
+    body{
+        width:210mm;
+        height:297mm;
+    }
 }
 </style>
 </head>
@@ -162,12 +172,12 @@ DATA of SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)
 <label>To Date</label>
 <input type="date" id="toDate">
 </div>
-
 </div>
 
-<div class="kpis" id="summarySection">
+<div id="summarySection" class="kpis">
+
 <div class="kpi-big" id="totalSurgeries">0</div>
-<div>Total Surgeries</div>
+<div><b>Total Surgeries</b></div>
 
 <div class="kpi-row">
 <div class="kpi" id="maleCount">Male: 0</div>
@@ -184,6 +194,10 @@ DATA of SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)
 <div class="kpi" id="spinalCount">Spinal: 0</div>
 <div class="kpi" id="generalCount">General: 0</div>
 </div>
+
+<br>
+<div id="execText" style="max-width:800px;margin:auto;font-size:14px;"></div>
+
 </div>
 
 <div class="chart-row">
@@ -193,7 +207,7 @@ DATA of SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)
 
 <div class="chart-row">
 <canvas id="typeChart"></canvas>
-<canvas id="anaesthesiaChart"></canvas>
+<canvas id="anaChart"></canvas>
 </div>
 
 <div class="buttons">
@@ -211,7 +225,7 @@ Software Engineer MUHAMMAD UMAIR SYED (IT Officer, Sadiq Abbasi Hospital, Bahawa
 <script>
 
 let rawData=[];
-let otChart, wardChart, typeChart, anaesthesiaChart;
+let otChart, wardChart, typeChart, anaChart;
 
 const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
@@ -238,6 +252,17 @@ document.querySelectorAll("select,input").forEach(el=>{
     el.addEventListener("change",updateDashboard);
 });
 
+function getAgeGroup(age){
+    if(age<0) return null;
+    if(age<1/12) return "Below 30 Days";
+    if(age<1) return "1 Month to 1 Year";
+    if(age<=15) return "1 Year to 15 Years";
+    if(age<=30) return "15 to 30 Years";
+    if(age<=45) return "30 Years to 45 Years";
+    if(age<=60) return "45 Years to 60 Years";
+    return "65 Years & above";
+}
+
 function filterData(){
     return rawData.filter(r=>{
         let otF=otFilter.value==="ALL OTS"||r.ot===otFilter.value;
@@ -245,11 +270,13 @@ function filterData(){
         let genderF=genderFilter.value==="ALL GENDERS"||r.gender===genderFilter.value;
         let typeF=typeFilter.value==="ALL TYPES"||r.type===typeFilter.value;
 
+        let ageF=ageFilter.value==="ALL"||getAgeGroup(r.age)===ageFilter.value;
+
         let from=fromDate.value?new Date(fromDate.value):null;
         let to=toDate.value?new Date(toDate.value):null;
         let dateF=(!from||r.date>=from)&&(!to||r.date<=to);
 
-        return otF&&wardF&&genderF&&typeF&&dateF;
+        return otF&&wardF&&genderF&&typeF&&ageF&&dateF;
     });
 }
 
@@ -268,52 +295,70 @@ function updateDashboard(){
     spinalCount.innerText="Spinal: "+data.filter(d=>d.anaesthesia==="SPINAL").length;
     generalCount.innerText="General: "+data.filter(d=>d.anaesthesia==="GENERAL").length;
 
+    execText.innerHTML=
+    "<b>Executive Summary:</b><br>"+
+    "Total "+data.length+" surgeries performed under selected criteria. "+
+    "Major cases: "+data.filter(d=>d.type==='MAJOR').length+
+    ", Minor cases: "+data.filter(d=>d.type==='MINOR').length+
+    ". Male: "+data.filter(d=>d.gender==='MALE').length+
+    ", Female: "+data.filter(d=>d.gender==='FEMALE').length+".";
+
     buildCharts(data);
 }
 
+function buildPie(ctx,label,dataObj){
+    return new Chart(ctx,{
+        type:'pie',
+        data:{
+            labels:Object.keys(dataObj),
+            datasets:[{
+                data:Object.values(dataObj),
+                backgroundColor:['#0077cc','#00aaff','#66c2ff','#ff9933','#33cc99','#cc66ff']
+            }]
+        },
+        options:{
+            plugins:{
+                legend:{position:'bottom'}
+            }
+        }
+    });
+}
+
+function countBy(data,key){
+    return data.reduce((a,b)=>{
+        a[b[key]]=(a[b[key]]||0)+1;
+        return a;
+    },{});
+}
+
 function buildCharts(data){
-
-    const countBy=(key)=>{
-        return data.reduce((acc,d)=>{
-            acc[d[key]]=(acc[d[key]]||0)+1;
-            return acc;
-        },{});
-    }
-
-    const createChart=(ctx,label,dataObj)=>{
-        return new Chart(ctx,{
-            type:'bar',
-            data:{
-                labels:Object.keys(dataObj),
-                datasets:[{
-                    label:label,
-                    data:Object.values(dataObj),
-                    backgroundColor:['#0077cc','#00aaff','#66c2ff','#99d6ff','#cceeff']
-                }]
-            },
-            options:{responsive:true,plugins:{legend:{display:false}}}
-        });
-    }
-
     if(otChart) otChart.destroy();
     if(wardChart) wardChart.destroy();
     if(typeChart) typeChart.destroy();
-    if(anaesthesiaChart) anaesthesiaChart.destroy();
+    if(anaChart) anaChart.destroy();
 
-    otChart=createChart(document.getElementById("otChart"),"OT Wise",countBy("ot"));
-    wardChart=createChart(document.getElementById("wardChart"),"Ward Wise",countBy("ward"));
-    typeChart=createChart(document.getElementById("typeChart"),"Major/Minor",countBy("type"));
-    anaesthesiaChart=createChart(document.getElementById("anaesthesiaChart"),"Anaesthesia",countBy("anaesthesia"));
+    otChart=buildPie(otChart=document.getElementById("otChart"),"OT",countBy(data,"ot"));
+    wardChart=buildPie(wardChart=document.getElementById("wardChart"),"WARD",countBy(data,"ward"));
+    typeChart=buildPie(typeChart=document.getElementById("typeChart"),"TYPE",countBy(data,"type"));
+    anaChart=buildPie(anaChart=document.getElementById("anaChart"),"ANAESTHESIA",countBy(data,"anaesthesia"));
 }
 
 function exportPDF(){
-    const element=document.getElementById("summarySection");
-    html2pdf().from(element).save("Executive_Summary.pdf");
+    html2pdf().from(summarySection).save("Executive_Summary_SAH.pdf");
 }
 
 function updateClock(){
     const now=new Date();
-    clock.innerHTML=now.toLocaleString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+    clock.innerHTML=now.toLocaleString('en-US',{
+        weekday:'long',
+        year:'numeric',
+        month:'long',
+        day:'numeric',
+        hour:'2-digit',
+        minute:'2-digit',
+        second:'2-digit',
+        hour12:true
+    });
 }
 setInterval(updateClock,1000);
 
