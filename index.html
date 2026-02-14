@@ -207,152 +207,170 @@ Software Engineer MUHAMMAD UMAIR SYED
 </div>
 
 <script>
-const url="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
-let rawData=[];
-let charts={};
+const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
-function parseDateMMDDYYYY(str){
-if(!str) return null;
-let parts=str.split("/");
-return new Date(parts[2],parts[0]-1,parts[1]);
+let rawData = [];
+let charts = {};
+
+/* --------- FIXED DATE PARSER (DD/MM/YYYY SAFE) --------- */
+function parseDateFlexible(str){
+    if(!str) return null;
+
+    // Handles both DD/MM/YYYY and MM/DD/YYYY automatically
+    let parts = str.split("/");
+    if(parts.length !== 3) return null;
+
+    let day   = parseInt(parts[0]);
+    let month = parseInt(parts[1]) - 1;
+    let year  = parseInt(parts[2]);
+
+    return new Date(year, month, day);
 }
 
+/* --------- LOAD DATA --------- */
 Papa.parse(url,{
-download:true,
-header:true,
-skipEmptyLines:true,
-complete:function(results){
-rawData=results.data;
-applyFilters();
-}
+    download:true,
+    header:true,
+    skipEmptyLines:true,
+    complete:function(results){
+        rawData = results.data;
+        applyFilters();
+    }
 });
 
+/* --------- FILTER LISTENERS --------- */
 document.querySelectorAll("select,input").forEach(el=>{
-el.addEventListener("change",applyFilters);
+    el.addEventListener("change", applyFilters);
 });
 
+/* --------- AGE CATEGORY --------- */
 function ageCategory(age){
-age=parseFloat(age);
-if(age<0.1) return "Below 30 Days";
-if(age<1) return "1 Month to 1 Year";
-if(age<15) return "1 Year to 15 Years";
-if(age<30) return "15 to 30 Years";
-if(age<45) return "30 Years to 45 Years";
-if(age<60) return "45 Years to 60 Years";
-if(age>=65) return "65 Years & above";
-return "";
+    age = parseFloat(age);
+    if(isNaN(age)) return "";
+    if(age < 0.1) return "Below 30 Days";
+    if(age < 1) return "1 Month to 1 Year";
+    if(age < 15) return "1 Year to 15 Years";
+    if(age < 30) return "15 to 30 Years";
+    if(age < 45) return "30 Years to 45 Years";
+    if(age < 60) return "45 Years to 60 Years";
+    if(age >= 65) return "65 Years & above";
+    return "";
 }
 
+/* --------- APPLY FILTERS --------- */
 function applyFilters(){
 
-let filtered=rawData.filter(row=>{
+    let filtered = rawData.filter(row => {
 
-let ot=row["OT"]?.trim();
-let ward=row["WARD"]?.trim();
-let gender=row["GENDER"]?.trim();
-let age=row["AGE"];
-let type=row["TYPE"]?.trim();
-let ana=row["ANAESTHESIA"]?.trim();
-let date=parseDateMMDDYYYY(row["Date"]);
+        let ot     = row["OT"]?.trim();
+        let ward   = row["WARD"]?.trim();
+        let gender = row["GENDER"]?.trim();
+        let age    = row["AGE"];
+        let type   = row["TYPE"]?.trim();
+        let date   = parseDateFlexible(row["Date"]);
 
-if(!date) return false;
+        if(!date || isNaN(date)) return false;
 
-if(otFilter.value!="ALL OTS" && ot!=otFilter.value) return false;
-if(wardFilter.value!="ALL WARDS" && ward!=wardFilter.value) return false;
-if(genderFilter.value!="ALL GENDERS" && gender!=genderFilter.value) return false;
-if(typeFilter.value!="ALL TYPES" && type!=typeFilter.value) return false;
+        if(otFilter.value !== "ALL OTS" && ot !== otFilter.value) return false;
+        if(wardFilter.value !== "ALL WARDS" && ward !== wardFilter.value) return false;
+        if(genderFilter.value !== "ALL GENDERS" && gender !== genderFilter.value) return false;
+        if(typeFilter.value !== "ALL TYPES" && type !== typeFilter.value) return false;
 
-if(ageFilter.value!="ALL" && ageCategory(age)!=ageFilter.value) return false;
+        if(ageFilter.value !== "ALL" && ageCategory(age) !== ageFilter.value) return false;
 
-if(fromDate.value){
-let from=new Date(fromDate.value);
-if(date<from) return false;
+        if(fromDate.value){
+            let from = new Date(fromDate.value);
+            if(date < from) return false;
+        }
+
+        if(toDate.value){
+            let to = new Date(toDate.value);
+            to.setHours(23,59,59,999);
+            if(date > to) return false;
+        }
+
+        return true;
+    });
+
+    updateDashboard(filtered);
 }
-if(toDate.value){
-let to=new Date(toDate.value);
-to.setHours(23,59,59,999);
-if(date>to) return false;
-}
 
-return true;
-});
-
-updateDashboard(filtered);
-}
-
+/* --------- DASHBOARD UPDATE --------- */
 function updateDashboard(data){
 
-let total=data.length;
-let male=data.filter(r=>r["GENDER"]=="MALE").length;
-let female=data.filter(r=>r["GENDER"]=="FEMALE").length;
-let major=data.filter(r=>r["TYPE"]=="MAJOR").length;
-let minor=data.filter(r=>r["TYPE"]=="MINOR").length;
-let local=data.filter(r=>r["ANAESTHESIA"]=="LOCAL").length;
-let spinal=data.filter(r=>r["ANAESTHESIA"]=="SPINAL").length;
-let general=data.filter(r=>r["ANAESTHESIA"]=="GENERAL").length;
+    let total   = data.length;
+    let male    = data.filter(r=>r["GENDER"]==="MALE").length;
+    let female  = data.filter(r=>r["GENDER"]==="FEMALE").length;
+    let major   = data.filter(r=>r["TYPE"]==="MAJOR").length;
+    let minor   = data.filter(r=>r["TYPE"]==="MINOR").length;
+    let local   = data.filter(r=>r["ANAESTHESIA"]==="LOCAL").length;
+    let spinal  = data.filter(r=>r["ANAESTHESIA"]==="SPINAL").length;
+    let general = data.filter(r=>r["ANAESTHESIA"]==="GENERAL").length;
 
-totalSurgeries.innerHTML="TOTAL SURGERIES: "+total;
-maleKPI.innerHTML="Male: "+male;
-femaleKPI.innerHTML="Female: "+female;
-majorKPI.innerHTML="Major: "+major;
-minorKPI.innerHTML="Minor: "+minor;
-localKPI.innerHTML="Local: "+local;
-spinalKPI.innerHTML="Spinal: "+spinal;
-generalKPI.innerHTML="General: "+general;
+    totalSurgeries.innerHTML = "TOTAL SURGERIES: " + total;
+    maleKPI.innerHTML   = "Male: " + male;
+    femaleKPI.innerHTML = "Female: " + female;
+    majorKPI.innerHTML  = "Major: " + major;
+    minorKPI.innerHTML  = "Minor: " + minor;
+    localKPI.innerHTML  = "Local: " + local;
+    spinalKPI.innerHTML = "Spinal: " + spinal;
+    generalKPI.innerHTML= "General: " + general;
 
-renderChart("otChart",group(data,"OT"),"OT Wise Surgeries");
-renderChart("wardChart",group(data,"WARD"),"Ward Wise Surgeries");
-renderChart("typeChart",group(data,"TYPE"),"Major/Minor Surgeries");
-renderChart("anaChart",group(data,"ANAESTHESIA"),"Anaesthesia Type");
+    renderChart("otChart", group(data,"OT"), "OT Wise Surgeries");
+    renderChart("wardChart", group(data,"WARD"), "Ward Wise Surgeries");
+    renderChart("typeChart", group(data,"TYPE"), "Major / Minor Distribution");
+    renderChart("anaChart", group(data,"ANAESTHESIA"), "Anaesthesia Distribution");
 }
 
+/* --------- GROUPING FUNCTION --------- */
 function group(data,key){
-let obj={};
-data.forEach(r=>{
-let k=r[key];
-if(k) obj[k]=obj[k]?obj[k]+1:1;
-});
-return obj;
+    let obj = {};
+    data.forEach(r=>{
+        let k = r[key]?.trim();
+        if(k){
+            obj[k] = obj[k] ? obj[k] + 1 : 1;
+        }
+    });
+    return obj;
 }
 
-function renderChart(id,data,title){
+/* --------- CHART RENDER --------- */
+function renderChart(id, data, title){
 
-if(charts[id]) charts[id].destroy();
+    if(charts[id]){
+        charts[id].destroy();
+    }
 
-charts[id]=new Chart(document.getElementById(id),{
-type:"bar",
-data:{
-labels:Object.keys(data),
-datasets:[{
-data:Object.values(data),
-backgroundColor:["#1976d2","#43a047","#fbc02d","#e53935","#8e24aa","#fb8c00"]
-}]
-},
-options:{
-responsive:true,
-plugins:{legend:{display:false},title:{display:true,text:title}}
+    let ctx = document.getElementById(id).getContext("2d");
+
+    charts[id] = new Chart(ctx,{
+        type:"bar",
+        data:{
+            labels:Object.keys(data),
+            datasets:[{
+                label:"Cases",
+                data:Object.values(data),
+                backgroundColor:"#1976d2"
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+                legend:{display:false},
+                title:{
+                    display:true,
+                    text:title
+                }
+            }
+        }
+    });
 }
-});
-}
 
-function exportPDF(){
-let content=document.createElement("div");
-content.innerHTML=`
-<h2 style="text-align:center;">SADIQ ABBASI HOSPITAL, BAHAWALPUR</h2>
-<h3 style="text-align:center;">Executive Surgery Summary</h3>
-<p>${totalSurgeries.innerText}</p>
-<p>${maleKPI.innerText} | ${femaleKPI.innerText}</p>
-<p>${majorKPI.innerText} | ${minorKPI.innerText}</p>
-<p>${localKPI.innerText} | ${spinalKPI.innerText} | ${generalKPI.innerText}</p>
-<p>This report summarizes surgical workload distribution, anaesthesia trends and case complexity mix for selected criteria.</p>
-`;
-html2pdf().from(content).save("Executive_Summary.pdf");
-}
-
+/* --------- CLOCK --------- */
 function updateClock(){
-let now=new Date();
-clock.innerHTML=now.toLocaleString();
+    clock.innerHTML = new Date().toLocaleString();
 }
 setInterval(updateClock,1000);
 updateClock();
@@ -360,3 +378,4 @@ updateClock();
 </script>
 </body>
 </html>
+
