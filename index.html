@@ -7,237 +7,419 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{font-family:'Segoe UI',sans-serif;margin:0;background:#f4f7fb;}
-header{text-align:center;padding:20px;background:white;box-shadow:0 2px 8px rgba(0,0,0,0.05);position:relative;}
-header h1{margin:0;font-size:20px;}
-#clock{position:absolute;right:20px;top:20px;font-size:13px;font-weight:600;}
-.container{padding:20px;}
-.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:20px;}
-.filters label{font-weight:600;font-size:13px;}
-.filters select,.filters input{width:100%;padding:6px;margin-top:4px;}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;margin-bottom:25px;}
-.kpi{background:white;padding:15px;border-radius:8px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
-.kpi h2{margin:5px 0;color:#007bff;}
-.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
-.chart-box{background:white;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);height:350px;}
-.chart-box canvas{height:100%!important;}
-.buttons{display:flex;justify-content:space-between;margin-top:25px;}
-footer{text-align:center;padding:15px;background:white;margin-top:20px;}
+body{
+font-family: 'Segoe UI',sans-serif;
+margin:0;
+background:#f4f7fb;
+color:#222;
+}
+
+header{
+text-align:center;
+padding:20px;
+background:white;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+position:relative;
+}
+
+h1{
+margin:0;
+font-size:22px;
+color:#003366;
+}
+
+h2{
+margin:5px 0 0 0;
+font-weight:500;
+font-size:15px;
+color:#555;
+}
+
+#clock{
+position:absolute;
+right:20px;
+top:20px;
+font-weight:600;
+font-size:14px;
+color:#003366;
+}
+
+.container{
+padding:20px;
+max-width:1400px;
+margin:auto;
+}
+
+.filters{
+display:flex;
+flex-wrap:wrap;
+gap:15px;
+justify-content:center;
+margin-bottom:20px;
+}
+
+.filter-box{
+display:flex;
+flex-direction:column;
+min-width:160px;
+}
+
+.filter-box label{
+font-weight:600;
+font-size:13px;
+margin-bottom:4px;
+}
+
+select,input{
+padding:6px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+.kpis{
+text-align:center;
+margin-bottom:25px;
+}
+
+.kpi-large{
+font-size:28px;
+font-weight:bold;
+color:#003366;
+margin-bottom:10px;
+}
+
+.kpi-row{
+display:flex;
+justify-content:center;
+gap:25px;
+flex-wrap:wrap;
+margin-bottom:8px;
+}
+
+.kpi{
+background:white;
+padding:10px 20px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
+font-weight:600;
+min-width:150px;
+}
+
+.charts{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:30px;
+}
+
+canvas{
+background:white;
+padding:10px;
+border-radius:12px;
+box-shadow:0 3px 8px rgba(0,0,0,0.08);
+max-width:450px;
+}
+
+.footer{
+margin-top:30px;
+text-align:center;
+font-size:13px;
+color:#444;
+padding:10px;
+background:white;
+}
+
+.buttons{
+display:flex;
+justify-content:space-between;
+margin-top:20px;
+}
+
+button{
+padding:8px 15px;
+border:none;
+border-radius:6px;
+background:#003366;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#00509e;
+}
+
+@media print{
+button,.filters,#clock{display:none;}
+body{background:white;}
+canvas{display:none;}
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>SADIQ ABBASI HOSPITAL, BAHAWALPUR<br>SURGERY DASHBOARD</h1>
+<h1>SADIQ ABBASI HOSPITAL, BAHAWALPUR</h1>
+<h2>Surgery Data Dashboard</h2>
 <div id="clock"></div>
 </header>
 
 <div class="container">
 
 <div class="filters">
-<div>
+<div class="filter-box">
+<label>OT</label>
+<select id="otFilter">
+<option>ALL OTS</option>
+<option>MAIN OT</option>
+<option>GYNAE OT</option>
+</select>
+</div>
+
+<div class="filter-box">
+<label>WARD</label>
+<select id="wardFilter">
+<option>ALL WARDS</option>
+<option>GYNAE</option>
+<option>ORTHO</option>
+<option>SURGERY</option>
+<option>EYE</option>
+</select>
+</div>
+
+<div class="filter-box">
+<label>Gender</label>
+<select id="genderFilter">
+<option>ALL GENDERS</option>
+<option>MALE</option>
+<option>FEMALE</option>
+<option>TRANSGENDER</option>
+</select>
+</div>
+
+<div class="filter-box">
+<label>Age Group</label>
+<select id="ageFilter">
+<option>ALL</option>
+<option>Below 30 Days</option>
+<option>1 Month to 1 Year</option>
+<option>1 Year to 15 Years</option>
+<option>15 to 30 Years</option>
+<option>30 Years to 45 Years</option>
+<option>45 Years to 60 Years</option>
+<option>65 Years & above</option>
+</select>
+</div>
+
+<div class="filter-box">
+<label>Surgery Type</label>
+<select id="typeFilter">
+<option>ALL TYPES</option>
+<option>MAJOR</option>
+<option>MINOR</option>
+</select>
+</div>
+
+<div class="filter-box">
 <label>From Date</label>
 <input type="date" id="fromDate">
 </div>
 
-<div>
+<div class="filter-box">
 <label>To Date</label>
 <input type="date" id="toDate">
 </div>
+
 </div>
 
 <div class="kpis">
-<div class="kpi"><div>Total Surgeries</div><h2 id="totalKPI">0</h2></div>
-<div class="kpi"><div>Male</div><h2 id="maleKPI">0</h2></div>
-<div class="kpi"><div>Female</div><h2 id="femaleKPI">0</h2></div>
-<div class="kpi"><div>Major</div><h2 id="majorKPI">0</h2></div>
-<div class="kpi"><div>Minor</div><h2 id="minorKPI">0</h2></div>
+<div class="kpi-large" id="totalSurgeries">0</div>
+
+<div class="kpi-row">
+<div class="kpi" id="maleCount">Male: 0</div>
+<div class="kpi" id="femaleCount">Female: 0</div>
+</div>
+
+<div class="kpi-row">
+<div class="kpi" id="majorCount">Major: 0</div>
+<div class="kpi" id="minorCount">Minor: 0</div>
+</div>
+
+<div class="kpi-row">
+<div class="kpi" id="localCount">Local: 0</div>
+<div class="kpi" id="spinalCount">Spinal: 0</div>
+<div class="kpi" id="generalCount">General: 0</div>
+</div>
 </div>
 
 <div class="charts">
-<div class="chart-box"><canvas id="otChart"></canvas></div>
-<div class="chart-box"><canvas id="wardChart"></canvas></div>
+<canvas id="otChart"></canvas>
+<canvas id="wardChart"></canvas>
+<canvas id="typeChart"></canvas>
+<canvas id="anaesthesiaChart"></canvas>
 </div>
 
 <div class="buttons">
-<button onclick="exportPDF()">Export PDF</button>
-<button onclick="location.reload()">Refresh</button>
+<button onclick="exportPDF()">Executive Summary Export to PDF</button>
+<button onclick="location.reload()">Refresh Dashboard</button>
 </div>
 
 </div>
 
-<footer>
-Developed By: MUHAMMAD UMAIR SYED (IT Officer)
-</footer>
+<div class="footer">
+Developed By: <a href="https://www.linkedin.com/in/smus79" target="_blank">
+Software Engineer MUHAMMAD UMAIR SYED (IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
+</a>
+</div>
 
 <script>
-
-const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
+const csvUrl="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
 let rawData=[];
-let charts={};
 
-// ============================
-// LOAD DATA
-// ============================
-Papa.parse(sheetURL,{
-    download:true,
-    header:true,
-    skipEmptyLines:true,
-    complete:function(results){
-
-        rawData = results.data.map(row=>{
-
-            // Trim headers safely
-            let cleanRow={};
-            Object.keys(row).forEach(key=>{
-                cleanRow[key.trim().toUpperCase()] = row[key];
-            });
-
-            return {
-                ...cleanRow,
-                PARSED_DATE: parseMMDDYYYY(cleanRow["DATE"])
-            };
-        });
-
-        applyFilters();
-    }
+Papa.parse(csvUrl,{
+download:true,
+header:true,
+complete:function(results){
+rawData=results.data;
+applyFilters();
+}
 });
 
-// ============================
-// STRICT MM/DD/YYYY PARSER
-// ============================
-function parseMMDDYYYY(dateStr){
+document.querySelectorAll("select,input").forEach(el=>{
+el.addEventListener("change",applyFilters);
+});
 
-    if(!dateStr) return null;
-
-    const parts = dateStr.split("/");
-
-    if(parts.length !== 3) return null;
-
-    const month = parseInt(parts[0]) - 1;
-    const day   = parseInt(parts[1]);
-    const year  = parseInt(parts[2]);
-
-    const date = new Date(year, month, day);
-
-    if(isNaN(date)) return null;
-
-    date.setHours(0,0,0,0);
-
-    return date;
-}
-
-// ============================
-// FILTERING LOGIC
-// ============================
 function applyFilters(){
+let filtered=rawData.filter(row=>{
 
-    const fromVal = document.getElementById("fromDate").value;
-    const toVal   = document.getElementById("toDate").value;
+let ot=row["OT"]||row["B"];
+let ward=row["WARD"]||row["C"];
+let date=row["Date"]||row["D"];
+let gender=row["GENDER"]||row["G"];
+let age=parseInt(row["AGE"]||row["H"]);
+let anaesthesia=row["ANAESTHESIA"]||row["AD"];
+let type=row["TYPE"]||row["AE"];
 
-    const fromDate = fromVal ? new Date(fromVal) : null;
-    const toDate   = toVal ? new Date(toVal) : null;
+let otVal=document.getElementById("otFilter").value;
+let wardVal=document.getElementById("wardFilter").value;
+let genderVal=document.getElementById("genderFilter").value;
+let ageVal=document.getElementById("ageFilter").value;
+let typeVal=document.getElementById("typeFilter").value;
+let from=document.getElementById("fromDate").value;
+let to=document.getElementById("toDate").value;
 
-    if(fromDate) fromDate.setHours(0,0,0,0);
-    if(toDate)   toDate.setHours(23,59,59,999);
+let rowDate=new Date(date);
 
-    const filtered = rawData.filter(r=>{
+if(otVal!="ALL OTS" && ot!=otVal) return false;
+if(wardVal!="ALL WARDS" && ward!=wardVal) return false;
+if(genderVal!="ALL GENDERS" && gender!=genderVal) return false;
+if(typeVal!="ALL TYPES" && type!=typeVal) return false;
 
-        if(!r.PARSED_DATE) return false;
+if(from && rowDate<new Date(from)) return false;
+if(to && rowDate>new Date(to)) return false;
 
-        if(fromDate && r.PARSED_DATE < fromDate) return false;
-        if(toDate   && r.PARSED_DATE > toDate)   return false;
-
-        return true;
-    });
-
-    updateDashboard(filtered);
-}
-
-document.querySelectorAll("input").forEach(el=>{
-    el.addEventListener("change",applyFilters);
+return true;
 });
 
-// ============================
-// DASHBOARD UPDATE
-// ============================
+updateDashboard(filtered);
+}
+
+function countBy(data,key){
+let obj={};
+data.forEach(r=>{
+let val=r[key];
+if(val){
+obj[val]=(obj[val]||0)+1;
+}
+});
+return obj;
+}
+
 function updateDashboard(data){
 
-    document.getElementById("totalKPI").innerText=data.length;
-    document.getElementById("maleKPI").innerText=data.filter(r=>r["GENDER"]==="MALE").length;
-    document.getElementById("femaleKPI").innerText=data.filter(r=>r["GENDER"]==="FEMALE").length;
-    document.getElementById("majorKPI").innerText=data.filter(r=>r["TYPE"]==="MAJOR").length;
-    document.getElementById("minorKPI").innerText=data.filter(r=>r["TYPE"]==="MINOR").length;
+document.getElementById("totalSurgeries").innerText=
+"TOTAL SURGERIES: "+data.length;
 
-    createChart("otChart",countBy(data,"OT"));
-    createChart("wardChart",countBy(data,"WARD"));
+let gender=countBy(data,"GENDER");
+document.getElementById("maleCount").innerText="Male: "+(gender["MALE"]||0);
+document.getElementById("femaleCount").innerText="Female: "+(gender["FEMALE"]||0);
+
+let type=countBy(data,"TYPE");
+document.getElementById("majorCount").innerText="Major: "+(type["MAJOR"]||0);
+document.getElementById("minorCount").innerText="Minor: "+(type["MINOR"]||0);
+
+let ana=countBy(data,"ANAESTHESIA");
+document.getElementById("localCount").innerText="Local: "+(ana["LOCAL"]||0);
+document.getElementById("spinalCount").innerText="Spinal: "+(ana["SPINAL"]||0);
+document.getElementById("generalCount").innerText="General: "+(ana["GENERAL"]||0);
+
+drawChart("otChart",countBy(data,"OT"),"OT Wise Surgeries");
+drawChart("wardChart",countBy(data,"WARD"),"Ward Wise Surgeries");
+drawChart("typeChart",countBy(data,"TYPE"),"Major / Minor Surgeries");
+drawChart("anaesthesiaChart",countBy(data,"ANAESTHESIA"),"Anaesthesia Type");
 }
 
-// ============================
-// GROUPING
-// ============================
-function countBy(data,key){
-    let obj={};
-    data.forEach(r=>{
-        let val=r[key]||"Unknown";
-        obj[val]=(obj[val]||0)+1;
-    });
-    return obj;
+let chartInstances={};
+
+function drawChart(id,data,title){
+
+if(chartInstances[id]) chartInstances[id].destroy();
+
+chartInstances[id]=new Chart(document.getElementById(id),{
+type:'bar',
+data:{
+labels:Object.keys(data),
+datasets:[{
+label:title,
+data:Object.values(data),
+backgroundColor:[
+"#003366","#0074D9","#2ECC40","#FF851B","#B10DC9","#FF4136"
+]
+}]
+},
+options:{
+plugins:{legend:{display:false}},
+responsive:true,
+maintainAspectRatio:false
+}
+});
 }
 
-// ============================
-// CHART
-// ============================
-function createChart(id,dataObj){
+function exportPDF(){
+const { jsPDF } = window.jspdf;
+let doc=new jsPDF();
 
-    if(charts[id]) charts[id].destroy();
+doc.setFontSize(14);
+doc.text("SADIQ ABBASI HOSPITAL, BAHAWALPUR",20,20);
+doc.text("Surgery Executive Summary",20,30);
 
-    charts[id]=new Chart(document.getElementById(id),{
-        type:'bar',
-        data:{
-            labels:Object.keys(dataObj),
-            datasets:[{
-                data:Object.values(dataObj),
-                backgroundColor:'#007bff'
-            }]
-        },
-        options:{
-            responsive:true,
-            maintainAspectRatio:false,
-            plugins:{legend:{display:false}},
-            scales:{y:{beginAtZero:true}}
-        }
-    });
+doc.setFontSize(11);
+doc.text(document.getElementById("totalSurgeries").innerText,20,45);
+doc.text(document.getElementById("maleCount").innerText,20,55);
+doc.text(document.getElementById("femaleCount").innerText,20,65);
+doc.text(document.getElementById("majorCount").innerText,20,75);
+doc.text(document.getElementById("minorCount").innerText,20,85);
+doc.text(document.getElementById("localCount").innerText,20,95);
+doc.text(document.getElementById("spinalCount").innerText,20,105);
+doc.text(document.getElementById("generalCount").innerText,20,115);
+
+doc.text("Generated on: "+new Date().toLocaleString(),20,130);
+
+doc.save("Surgery_Executive_Summary.pdf");
 }
 
-// ============================
-// CLOCK
-// ============================
 function updateClock(){
-    const now=new Date();
-    document.getElementById("clock").innerHTML=
-        now.toLocaleDateString()+"<br>"+now.toLocaleTimeString();
+let now=new Date();
+document.getElementById("clock").innerText=
+now.toLocaleDateString()+" "+
+now.toLocaleTimeString();
 }
 setInterval(updateClock,1000);
 updateClock();
-
-// ============================
-// PDF EXPORT
-// ============================
-function exportPDF(){
-    html2pdf().from(document.body).set({
-        margin:5,
-        filename:'Executive_Summary.pdf',
-        html2canvas:{scale:2},
-        jsPDF:{orientation:'portrait',unit:'mm',format:'a4'}
-    }).save();
-}
-
 </script>
 
 </body>
