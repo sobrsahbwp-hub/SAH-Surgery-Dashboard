@@ -2,146 +2,158 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SADIQ ABBASI HOSPITAL – Surgical Executive Dashboard</title>
+<title>Sadiq Abbasi Hospital – Surgery Dashboard</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<!-- PDF Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{margin:0;font-family:Segoe UI,Arial;background:#f1f5f9;color:#1e293b;}
+body{
+font-family:Segoe UI;
+margin:0;
+background:#f4f7fb;
+color:#1e293b;
+}
 
-header{
-background:#e2e8f0;
+.header{
+text-align:center;
 padding:15px;
-display:flex;
-justify-content:center;
-align-items:center;
+background:white;
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
 position:relative;
 }
 
-header img{height:75px;}
-header h1{margin:0;font-size:22px;color:#1e3a8a;text-align:center;}
-
-#clock{
+.clock{
 position:absolute;
 right:20px;
 top:20px;
-font-weight:600;
+font-weight:bold;
 font-size:14px;
+color:#2563eb;
 }
-
-.container{padding:20px;}
 
 .filters{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-gap:12px;
-margin-bottom:25px;
+gap:15px;
+padding:20px;
+background:white;
+margin:15px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.05);
 }
 
-.filter-box label{
-font-size:12px;
-font-weight:600;
-color:#1e40af;
+.filter-box{
+display:flex;
+flex-direction:column;
 }
 
-.filter-box select,
-.filter-box input{
-width:100%;
-padding:8px;
+select,input{
+padding:6px;
 border-radius:6px;
 border:1px solid #cbd5e1;
 }
 
 .kpis{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
 gap:15px;
-margin-bottom:30px;
+margin:15px;
 }
 
 .kpi{
 background:white;
-padding:18px;
-border-radius:12px;
+padding:15px;
+border-radius:10px;
 text-align:center;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
+box-shadow:0 2px 6px rgba(0,0,0,0.05);
 }
 
-.kpi h2{margin:0;font-size:26px;color:#2563eb;}
-
-.charts{
-display:flex;
-flex-wrap:wrap;
-gap:20px;
-justify-content:center;
+.kpi h2{
+margin:5px 0;
+color:#2563eb;
 }
 
-.chart-box{
+.chart-container{
+width:90%;
+margin:auto;
+margin-top:20px;
 background:white;
 padding:20px;
-border-radius:12px;
-width:100%;
-max-width:500px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.05);
 }
 
-footer{
-margin-top:30px;
-background:#e2e8f0;
-padding:12px;
+.buttons{
 display:flex;
 justify-content:space-between;
-align-items:center;
+padding:20px;
 }
 
 button{
-padding:8px 14px;
+padding:8px 15px;
 border:none;
 border-radius:6px;
+background:#2563eb;
+color:white;
 cursor:pointer;
-font-weight:bold;
 }
 
-#pdfBtn{background:#16a34a;color:white;}
-#reloadBtn{background:#2563eb;color:white;}
+footer{
+text-align:center;
+padding:15px;
+background:white;
+margin-top:20px;
+font-size:13px;
+}
 
-@media(max-width:768px){
-header{flex-direction:column;}
-#clock{position:static;margin-top:8px;}
-footer{flex-direction:column;gap:8px;text-align:center;}
+@media print{
+button,.filters,.clock{display:none;}
+body{background:white;}
 }
 </style>
 </head>
 
 <body>
 
-<header>
-<div style="text-align:center;">
-<img src="https://drive.google.com/uc?export=view&id=1Y5PbMKEFDgSk9CiSZOAdVyxRyAse6hXU">
-<h1>SADIQ ABBASI HOSPITAL, BAHAWALPUR</h1>
+<div class="header">
+<h2>SADIQ ABBASI HOSPITAL, BAHAWALPUR</h2>
+<h3>Surgery Dashboard</h3>
+<div class="clock" id="clock"></div>
 </div>
-<div id="clock"></div>
-</header>
-
-<div class="container" id="dashboard">
 
 <div class="filters">
+
 <div class="filter-box">
 <label>OT</label>
-<select id="otFilter"><option value="">ALL</option></select>
+<select id="otFilter">
+<option>ALL OTS</option>
+<option>MAIN OT</option>
+<option>GYNAE OT</option>
+</select>
 </div>
 
 <div class="filter-box">
-<label>Ward</label>
-<select id="wardFilter"><option value="">ALL</option></select>
+<label>WARD</label>
+<select id="wardFilter">
+<option>ALL WARDS</option>
+<option>GYNAE</option>
+<option>ORTHO</option>
+<option>SURGERY</option>
+<option>EYE</option>
+</select>
 </div>
 
 <div class="filter-box">
 <label>Gender</label>
 <select id="genderFilter">
-<option value="">ALL</option>
+<option>ALL GENDERS</option>
 <option>MALE</option>
 <option>FEMALE</option>
 <option>TRANSGENDER</option>
@@ -149,9 +161,23 @@ footer{flex-direction:column;gap:8px;text-align:center;}
 </div>
 
 <div class="filter-box">
+<label>Age Group</label>
+<select id="ageFilter">
+<option>ALL</option>
+<option>Below 30 Days</option>
+<option>1 Month to 1 Year</option>
+<option>1 Year to 15 Years</option>
+<option>15 to 30 Years</option>
+<option>30 Years to 45 Years</option>
+<option>45 Years to 60 Years</option>
+<option>65 Years & above</option>
+</select>
+</div>
+
+<div class="filter-box">
 <label>Surgery Type</label>
 <select id="typeFilter">
-<option value="">ALL</option>
+<option>ALL TYPES</option>
 <option>MAJOR</option>
 <option>MINOR</option>
 </select>
@@ -166,150 +192,166 @@ footer{flex-direction:column;gap:8px;text-align:center;}
 <label>To Date</label>
 <input type="date" id="toDate">
 </div>
+
 </div>
 
 <div class="kpis">
-<div class="kpi"><h2 id="total">0</h2><p>Total</p></div>
-<div class="kpi"><h2 id="male">0</h2><p>Male</p></div>
-<div class="kpi"><h2 id="female">0</h2><p>Female</p></div>
-<div class="kpi"><h2 id="major">0</h2><p>Major</p></div>
-<div class="kpi"><h2 id="minor">0</h2><p>Minor</p></div>
+<div class="kpi"><h4>Total Surgeries</h4><h2 id="total">0</h2></div>
+<div class="kpi"><h4>Total Male</h4><h2 id="male">0</h2></div>
+<div class="kpi"><h4>Total Female</h4><h2 id="female">0</h2></div>
+<div class="kpi"><h4>Total Major</h4><h2 id="major">0</h2></div>
+<div class="kpi"><h4>Total Minor</h4><h2 id="minor">0</h2></div>
 </div>
 
-<div class="charts">
-<div class="chart-box"><canvas id="otChart"></canvas></div>
-<div class="chart-box"><canvas id="wardChart"></canvas></div>
-<div class="chart-box"><canvas id="pieChart"></canvas></div>
+<div class="chart-container">
+<canvas id="otChart"></canvas>
 </div>
 
+<div class="chart-container">
+<canvas id="wardChart"></canvas>
+</div>
+
+<div class="chart-container">
+<canvas id="typeChart"></canvas>
+</div>
+
+<div class="buttons">
+<button onclick="exportPDF()">Executive Summary Export to PDF</button>
+<button onclick="location.reload()">Refresh</button>
 </div>
 
 <footer>
-<button id="pdfBtn" onclick="exportExecutivePDF()">Executive Summary PDF</button>
-<div>IT Department – Sadiq Abbasi Hospital</div>
-<button id="reloadBtn" onclick="location.reload()">Reload</button>
+Developed By: 
+<a href="https://www.linkedin.com/in/smus79" target="_blank">
+Software Engineer MUHAMMAD UMAIR SYED 
+</a>
+(IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
 </footer>
 
 <script>
-const csvUrl="YOUR_CSV_LINK_HERE";
 
-let rawData=[];
-let otChart,wardChart,pieChart;
-let lastFiltered=[];
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
-/* CLOCK */
-setInterval(()=>{
-document.getElementById("clock").innerText=
-new Date().toLocaleDateString()+" | "+new Date().toLocaleTimeString();
-},1000);
+let data=[];
 
-/* FETCH DATA */
-Papa.parse(csvUrl,{
-download:true,
-header:true,
-skipEmptyLines:true,
-complete:res=>{
-rawData=res.data.map(r=>{
-let clean={};
-Object.keys(r).forEach(k=>{
-clean[k.trim().toUpperCase()]=r[k]?.toString().trim().toUpperCase();
+fetch(sheetURL)
+.then(res=>res.text())
+.then(text=>{
+let rows=text.split("\n").slice(1);
+rows.forEach(r=>{
+let cols=r.split(",");
+data.push({
+date:cols[0],
+ot:cols[1],
+ward:cols[2],
+gender:cols[3],
+age:parseInt(cols[4]),
+type:cols[5]
 });
-return clean;
 });
-populateFilters();
 updateDashboard();
-}
 });
 
 document.querySelectorAll("select,input").forEach(el=>{
 el.addEventListener("change",updateDashboard);
 });
 
-function populateFilters(){
-[...new Set(rawData.map(r=>r.OT).filter(Boolean))].forEach(v=>{
-otFilter.innerHTML+=`<option>${v}</option>`;
-});
-[...new Set(rawData.map(r=>r.WARD).filter(Boolean))].forEach(v=>{
-wardFilter.innerHTML+=`<option>${v}</option>`;
-});
+function ageGroup(age){
+if(age<0.1) return "Below 30 Days";
+if(age<1) return "1 Month to 1 Year";
+if(age<15) return "1 Year to 15 Years";
+if(age<30) return "15 to 30 Years";
+if(age<45) return "30 Years to 45 Years";
+if(age<60) return "45 Years to 60 Years";
+return "65 Years & above";
 }
 
 function updateDashboard(){
 
-const from=fromDate.value;
-const to=toDate.value;
+let filtered=data.filter(d=>{
 
-const filtered=rawData.filter(r=>{
+let fOT=document.getElementById("otFilter").value;
+let fWard=document.getElementById("wardFilter").value;
+let fGender=document.getElementById("genderFilter").value;
+let fAge=document.getElementById("ageFilter").value;
+let fType=document.getElementById("typeFilter").value;
 
-if(otFilter.value && r.OT!==otFilter.value) return false;
-if(wardFilter.value && r.WARD!==wardFilter.value) return false;
-if(genderFilter.value && r.GENDER!==genderFilter.value) return false;
-if(typeFilter.value && r.TYPE!==typeFilter.value) return false;
-
-if(from && new Date(r.DATE)<new Date(from)) return false;
-if(to && new Date(r.DATE)>new Date(to)) return false;
+if(fOT!="ALL OTS" && d.ot!=fOT) return false;
+if(fWard!="ALL WARDS" && d.ward!=fWard) return false;
+if(fGender!="ALL GENDERS" && d.gender!=fGender) return false;
+if(fType!="ALL TYPES" && d.type!=fType) return false;
+if(fAge!="ALL" && ageGroup(d.age)!=fAge) return false;
 
 return true;
 });
 
-lastFiltered=filtered;
+document.getElementById("total").innerText=filtered.length;
+document.getElementById("male").innerText=filtered.filter(d=>d.gender=="MALE").length;
+document.getElementById("female").innerText=filtered.filter(d=>d.gender=="FEMALE").length;
+document.getElementById("major").innerText=filtered.filter(d=>d.type=="MAJOR").length;
+document.getElementById("minor").innerText=filtered.filter(d=>d.type=="MINOR").length;
 
-/* KPI CALCULATIONS */
-const majorCount=filtered.filter(r=>r.TYPE==="MAJOR").length;
-const minorCount=filtered.filter(r=>r.TYPE==="MINOR").length;
-
-total.innerText=filtered.length;
-male.innerText=filtered.filter(r=>r.GENDER==="MALE").length;
-female.innerText=filtered.filter(r=>r.GENDER==="FEMALE").length;
-major.innerText=majorCount;
-minor.innerText=minorCount;
-
-/* DRAW CHARTS */
-drawBarChart("otChart",group(filtered,"OT"),otChart,c=>otChart=c);
-drawBarChart("wardChart",group(filtered,"WARD"),wardChart,c=>wardChart=c);
-drawPieChart("pieChart",majorCount,minorCount);
+createCharts(filtered);
 }
 
-function group(data,key){
-const obj={};
-data.forEach(r=>{
-if(r[key]){
-obj[r[key]]=(obj[r[key]]||0)+1;
-}
+let otChart,wardChart,typeChart;
+
+function createCharts(filtered){
+
+let otCounts={};
+let wardCounts={};
+let typeCounts={};
+
+filtered.forEach(d=>{
+otCounts[d.ot]=(otCounts[d.ot]||0)+1;
+wardCounts[d.ward]=(wardCounts[d.ward]||0)+1;
+typeCounts[d.type]=(typeCounts[d.type]||0)+1;
 });
-return obj;
-}
 
-function drawBarChart(id,data,chart,setChart){
-if(chart) chart.destroy();
+if(otChart) otChart.destroy();
+if(wardChart) wardChart.destroy();
+if(typeChart) typeChart.destroy();
 
-setChart(new Chart(document.getElementById(id),{
+otChart=new Chart(document.getElementById("otChart"),{
 type:"bar",
-data:{
-labels:Object.keys(data),
-datasets:[{
-data:Object.values(data),
-backgroundColor:"#2563eb"
-}]
-},
-options:{responsive:true,plugins:{legend:{display:false}}}
-}));
-}
+data:{labels:Object.keys(otCounts),
+datasets:[{data:Object.values(otCounts),
+backgroundColor:["#2563eb","#16a34a","#f59e0b"]}]}
+});
 
-function drawPieChart(id,majorCount,minorCount){
-if(pieChart) pieChart.destroy();
+wardChart=new Chart(document.getElementById("wardChart"),{
+type:"bar",
+data:{labels:Object.keys(wardCounts),
+datasets:[{data:Object.values(wardCounts),
+backgroundColor:["#2563eb","#16a34a","#f59e0b","#ef4444"]}]}
+});
 
-pieChart=new Chart(document.getElementById(id),{
+typeChart=new Chart(document.getElementById("typeChart"),{
 type:"pie",
-data:{
-labels:["MAJOR","MINOR"],
-datasets:[{
-data:[majorCount,minorCount],
-backgroundColor:["#16a34a","#f43f5e"]
-}]
-},
-options:{responsive:true}
+data:{labels:Object.keys(typeCounts),
+datasets:[{data:Object.values(typeCounts),
+backgroundColor:["#2563eb","#ef4444"]}]}
 });
 }
 
-/* EXECUTIV*
+function exportPDF(){
+html2canvas(document.body).then(canvas=>{
+const { jsPDF } = window.jspdf;
+let pdf=new jsPDF("p","mm","a4");
+pdf.addImage(canvas.toDataURL("image/png"),"PNG",0,0,210,297);
+pdf.save("Executive_Summary.pdf");
+});
+}
+
+function updateClock(){
+let now=new Date();
+document.getElementById("clock").innerText=
+now.toLocaleString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric",
+hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true});
+}
+setInterval(updateClock,1000);
+updateClock();
+
+</script>
+</body>
+</html>
