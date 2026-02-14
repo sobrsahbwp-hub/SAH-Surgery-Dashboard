@@ -2,128 +2,115 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SADIQ ABBASI HOSPITAL – Executive Surgical Dashboard</title>
+<title>SADIQ ABBASI HOSPITAL – Surgical Executive Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-body{
-    margin:0;
-    font-family:Segoe UI, Arial;
-    background:#f1f5f9;
-    color:#1e293b;
-}
+body{margin:0;font-family:Segoe UI,Arial;background:#f1f5f9;color:#1e293b;}
 
-/* HEADER */
 header{
-    background:#e2e8f0;
-    padding:15px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    position:relative;
+background:#e2e8f0;
+padding:15px;
+display:flex;
+justify-content:center;
+align-items:center;
+position:relative;
 }
 
 header img{height:75px;}
 header h1{margin:0;font-size:22px;color:#1e3a8a;text-align:center;}
 
 #clock{
-    position:absolute;
-    right:20px;
-    top:20px;
-    font-weight:600;
-    font-size:14px;
+position:absolute;
+right:20px;
+top:20px;
+font-weight:600;
+font-size:14px;
 }
 
-/* CONTAINER */
 .container{padding:20px;}
 
 .filters{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:12px;
-    margin-bottom:25px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+gap:12px;
+margin-bottom:25px;
 }
 
 .filter-box label{
-    font-size:12px;
-    font-weight:600;
-    color:#1e40af;
+font-size:12px;
+font-weight:600;
+color:#1e40af;
 }
 
 .filter-box select,
 .filter-box input{
-    width:100%;
-    padding:8px;
-    border-radius:6px;
-    border:1px solid #cbd5e1;
+width:100%;
+padding:8px;
+border-radius:6px;
+border:1px solid #cbd5e1;
 }
 
-/* KPI */
 .kpis{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:15px;
-    margin-bottom:30px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+gap:15px;
+margin-bottom:30px;
 }
 
 .kpi{
-    background:white;
-    padding:18px;
-    border-radius:12px;
-    text-align:center;
-    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+background:white;
+padding:18px;
+border-radius:12px;
+text-align:center;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
 }
 
-.kpi h2{
-    margin:0;
-    font-size:26px;
-    color:#2563eb;
-}
+.kpi h2{margin:0;font-size:26px;color:#2563eb;}
 
-/* CHARTS */
 .charts{
-    display:flex;
-    flex-wrap:wrap;
-    gap:20px;
-    justify-content:center;
+display:flex;
+flex-wrap:wrap;
+gap:20px;
+justify-content:center;
 }
 
 .chart-box{
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    width:100%;
-    max-width:500px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+background:white;
+padding:20px;
+border-radius:12px;
+width:100%;
+max-width:500px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
 }
 
 footer{
-    margin-top:30px;
-    background:#e2e8f0;
-    padding:12px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+margin-top:30px;
+background:#e2e8f0;
+padding:12px;
+display:flex;
+justify-content:space-between;
+align-items:center;
 }
 
 button{
-    padding:8px 14px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    font-weight:bold;
+padding:8px 14px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
 }
 
 #pdfBtn{background:#16a34a;color:white;}
 #reloadBtn{background:#2563eb;color:white;}
 
 @media(max-width:768px){
-    header{flex-direction:column;}
-    #clock{position:static;margin-top:8px;}
-    footer{flex-direction:column;gap:8px;text-align:center;}
+header{flex-direction:column;}
+#clock{position:static;margin-top:8px;}
+footer{flex-direction:column;gap:8px;text-align:center;}
 }
 </style>
 </head>
@@ -204,7 +191,7 @@ button{
 </footer>
 
 <script>
-const csvUrl="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
+const csvUrl="YOUR_CSV_LINK_HERE";
 
 let rawData=[];
 let otChart,wardChart,pieChart;
@@ -216,7 +203,7 @@ document.getElementById("clock").innerText=
 new Date().toLocaleDateString()+" | "+new Date().toLocaleTimeString();
 },1000);
 
-/* FETCH */
+/* FETCH DATA */
 Papa.parse(csvUrl,{
 download:true,
 header:true,
@@ -225,7 +212,7 @@ complete:res=>{
 rawData=res.data.map(r=>{
 let clean={};
 Object.keys(r).forEach(k=>{
-clean[k.trim().toUpperCase()]=r[k];
+clean[k.trim().toUpperCase()]=r[k]?.toString().trim().toUpperCase();
 });
 return clean;
 });
@@ -239,96 +226,90 @@ el.addEventListener("change",updateDashboard);
 });
 
 function populateFilters(){
-[...new Set(rawData.map(r=>r.OT))].forEach(v=>{
-if(v) otFilter.innerHTML+=`<option>${v}</option>`;
+[...new Set(rawData.map(r=>r.OT).filter(Boolean))].forEach(v=>{
+otFilter.innerHTML+=`<option>${v}</option>`;
 });
-[...new Set(rawData.map(r=>r.WARD))].forEach(v=>{
-if(v) wardFilter.innerHTML+=`<option>${v}</option>`;
+[...new Set(rawData.map(r=>r.WARD).filter(Boolean))].forEach(v=>{
+wardFilter.innerHTML+=`<option>${v}</option>`;
 });
 }
 
 function updateDashboard(){
+
 const from=fromDate.value;
 const to=toDate.value;
 
 const filtered=rawData.filter(r=>{
+
 if(otFilter.value && r.OT!==otFilter.value) return false;
 if(wardFilter.value && r.WARD!==wardFilter.value) return false;
 if(genderFilter.value && r.GENDER!==genderFilter.value) return false;
 if(typeFilter.value && r.TYPE!==typeFilter.value) return false;
+
 if(from && new Date(r.DATE)<new Date(from)) return false;
 if(to && new Date(r.DATE)>new Date(to)) return false;
+
 return true;
 });
 
 lastFiltered=filtered;
 
+/* KPI CALCULATIONS */
+const majorCount=filtered.filter(r=>r.TYPE==="MAJOR").length;
+const minorCount=filtered.filter(r=>r.TYPE==="MINOR").length;
+
 total.innerText=filtered.length;
 male.innerText=filtered.filter(r=>r.GENDER==="MALE").length;
 female.innerText=filtered.filter(r=>r.GENDER==="FEMALE").length;
-major.innerText=filtered.filter(r=>r.TYPE==="MAJOR").length;
-minor.innerText=filtered.filter(r=>r.TYPE==="MINOR").length;
+major.innerText=majorCount;
+minor.innerText=minorCount;
 
-drawChart("otChart",group(filtered,"OT"),"bar",otChart,c=>otChart=c);
-drawChart("wardChart",group(filtered,"WARD"),"bar",wardChart,c=>wardChart=c);
-drawChart("pieChart",{MAJOR:major.innerText,MINOR:minor.innerText},"pie",pieChart,c=>pieChart=c);
+/* DRAW CHARTS */
+drawBarChart("otChart",group(filtered,"OT"),otChart,c=>otChart=c);
+drawBarChart("wardChart",group(filtered,"WARD"),wardChart,c=>wardChart=c);
+drawPieChart("pieChart",majorCount,minorCount);
 }
 
 function group(data,key){
 const obj={};
 data.forEach(r=>{
-if(r[key]) obj[r[key]]=(obj[r[key]]||0)+1;
+if(r[key]){
+obj[r[key]]=(obj[r[key]]||0)+1;
+}
 });
 return obj;
 }
 
-function drawChart(id,data,type,chart,setChart){
+function drawBarChart(id,data,chart,setChart){
 if(chart) chart.destroy();
+
 setChart(new Chart(document.getElementById(id),{
-type:type,
+type:"bar",
 data:{
 labels:Object.keys(data),
 datasets:[{
 data:Object.values(data),
-backgroundColor:["#2563eb","#16a34a","#facc15","#f43f5e","#8b5cf6"]
+backgroundColor:"#2563eb"
 }]
 },
-options:{responsive:true}
+options:{responsive:true,plugins:{legend:{display:false}}}
 }));
 }
 
-/* EXECUTIVE PDF */
-function exportExecutivePDF(){
-let summary=`
-<h2 style="text-align:center;">Executive Summary</h2>
-<p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
-<p><strong>Total Surgeries:</strong> ${total.innerText}</p>
-<p><strong>Male:</strong> ${male.innerText}</p>
-<p><strong>Female:</strong> ${female.innerText}</p>
-<p><strong>Major:</strong> ${major.innerText}</p>
-<p><strong>Minor:</strong> ${minor.innerText}</p>
-<hr>
-<h3>OT Wise Summary</h3>
-${generateList(group(lastFiltered,"OT"))}
-<h3>Ward Wise Summary</h3>
-${generateList(group(lastFiltered,"WARD"))}
-`;
+function drawPieChart(id,majorCount,minorCount){
+if(pieChart) pieChart.destroy();
 
-const element=document.createElement("div");
-element.innerHTML=summary + document.getElementById("dashboard").innerHTML;
-
-html2pdf().from(element).save("Executive_Summary.pdf");
-}
-
-function generateList(obj){
-let html="<ul>";
-Object.keys(obj).forEach(k=>{
-html+=`<li>${k} : ${obj[k]}</li>`;
+pieChart=new Chart(document.getElementById(id),{
+type:"pie",
+data:{
+labels:["MAJOR","MINOR"],
+datasets:[{
+data:[majorCount,minorCount],
+backgroundColor:["#16a34a","#f43f5e"]
+}]
+},
+options:{responsive:true}
 });
-html+="</ul>";
-return html;
 }
-</script>
 
-</body>
-</html>
+/* EXECUTIV*
