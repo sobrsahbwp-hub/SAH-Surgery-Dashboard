@@ -3,59 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sadiq Abbasi Hospital - Surgery Dashboard</title>
+<title>Sadiq Abbasi Hospital – Surgery Dashboard</title>
 
 <!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-/* --- Add your CSS here (same as original) --- */
+body { font-family: 'Inter', sans-serif; margin:0; padding:0; background:#f9f9f9; color:#222;}
+.container { width:95%; max-width:1400px; margin:auto; padding:20px; }
+.header { display:flex; justify-content: space-between; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
+.header h1 { text-align:center; width:100%; font-size:1.8em; margin:0; }
+.clock { font-size:0.9em; text-align:right; min-width:180px; }
+.filters-section { margin-bottom:20px; }
+.filters-grid { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; }
+.filter-group { display:flex; flex-direction:column; }
+.filter-group label { font-weight:600; margin-bottom:5px; }
+.filter-group select, .filter-group input { padding:5px 8px; border-radius:5px; border:1px solid #ccc; min-width:120px; }
+.kpi-section { text-align:center; margin-bottom:25px; }
+.kpi { display:inline-block; margin:10px 15px; padding:15px 20px; background:#fff; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); min-width:140px; }
+.kpi-title { font-weight:500; font-size:0.9em; margin-bottom:5px; }
+.kpi-value { font-size:1.4em; font-weight:700; }
+.charts-section { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; margin-bottom:25px; }
+.chart-card { background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); flex:1 1 300px; max-width:500px; }
+.chart-card canvas { max-width:100%; }
+.buttons { display:flex; justify-content:space-between; margin-top:20px; flex-wrap:wrap; gap:10px; }
+button { padding:10px 15px; border:none; border-radius:5px; background:#0066cc; color:#fff; cursor:pointer; font-weight:600; }
+button:hover { background:#004999; }
+.footer { text-align:center; font-size:0.8em; margin-top:40px; }
+.footer a { color:#0066cc; text-decoration:none; font-weight:600; }
+.loading { text-align:center; font-weight:600; margin-top:50px; }
+@media print {
+  body { background:#fff; }
+  .charts-section, .filters-section, .buttons { display:none; }
+  .kpi-section { page-break-after:always; }
+}
 </style>
 </head>
 <body>
-
 <div class="container">
   <!-- Header -->
   <div class="header">
-    <div class="header-content">
-      <div style="flex: 0 0 200px;"></div>
-      <h1>Sadiq Abbasi Hospital, Bahawalpur<br><span style="font-size: 0.6em; font-weight: 400;">Surgery Data Dashboard</span></h1>
-      <div class="clock" id="clock">
-        <div class="time" id="time"></div>
-        <div class="date" id="date"></div>
-      </div>
-    </div>
+    <h1>Sadiq Abbasi Hospital, Bahawalpur<br><span style="font-size:0.6em;font-weight:400;">Surgery Data Dashboard</span></h1>
+    <div class="clock" id="clock"></div>
   </div>
 
   <!-- Filters -->
   <div class="filters-section">
     <div class="filters-grid">
-      <!-- OT Filter -->
-      <div class="filter-group">
-        <label>Operating Theatre</label>
-        <select id="otFilter"><option value="ALL">ALL OTS</option></select>
+      <div class="filter-group"><label>OT</label>
+        <select id="otFilter"><option value="ALL">ALL OTS</option><option value="MAIN OT">MAIN OT</option><option value="GYNAE OT">GYNAE OT</option></select>
       </div>
-
-      <!-- Ward Filter -->
-      <div class="filter-group">
-        <label>Ward</label>
-        <select id="wardFilter"><option value="ALL">ALL WARDS</option></select>
+      <div class="filter-group"><label>Ward</label>
+        <select id="wardFilter"><option value="ALL">ALL WARDS</option><option value="GYNAE">GYNAE</option><option value="ORTHO">ORTHO</option><option value="SURGERY">SURGERY</option><option value="EYE">EYE</option></select>
       </div>
-
-      <div class="filter-group">
-        <label>Gender</label>
-        <select id="genderFilter">
-          <option>ALL</option><option>MALE</option><option>FEMALE</option><option>TRANSGENDER</option>
-        </select>
+      <div class="filter-group"><label>Gender</label>
+        <select id="genderFilter"><option value="ALL">ALL GENDERS</option><option value="MALE">MALE</option><option value="FEMALE">FEMALE</option><option value="TRANSGENDER">TRANSGENDER</option></select>
       </div>
-
-      <div class="filter-group">
-        <label>Age Group</label>
+      <div class="filter-group"><label>Age Group</label>
         <select id="ageFilter">
           <option value="ALL">ALL AGE GROUPS</option>
           <option>Below 30 Days</option>
@@ -67,194 +76,196 @@
           <option>65 Years & above</option>
         </select>
       </div>
-
-      <div class="filter-group">
-        <label>Surgery Type</label>
-        <select id="typeFilter">
-          <option value="ALL">ALL TYPES</option><option>MAJOR</option><option>MINOR</option>
-        </select>
+      <div class="filter-group"><label>Surgery Type</label>
+        <select id="typeFilter"><option value="ALL">ALL TYPES</option><option>MAJOR</option><option>MINOR</option></select>
       </div>
-
-      <div class="filter-group">
-        <label>From</label><input type="date" id="fromDate">
-      </div>
-
-      <div class="filter-group">
-        <label>To</label><input type="date" id="toDate">
-      </div>
+      <div class="filter-group"><label>From</label><input type="date" id="fromDate"></div>
+      <div class="filter-group"><label>To</label><input type="date" id="toDate"></div>
     </div>
   </div>
 
-  <div id="loading" class="loading">Loading data...</div>
+  <!-- Loading -->
+  <div class="loading" id="loading">Loading data...</div>
 
-  <!-- KPIs and Charts ... same layout HTML as original ... -->
+  <!-- KPIs -->
+  <div class="kpi-section">
+    <div class="kpi"><div class="kpi-title">TOTAL SURGERIES</div><div class="kpi-value" id="kpiTotal">0</div></div>
+    <div class="kpi"><div class="kpi-title">MALE SURGERIES</div><div class="kpi-value" id="kpiMale">0</div></div>
+    <div class="kpi"><div class="kpi-title">FEMALE SURGERIES</div><div class="kpi-value" id="kpiFemale">0</div></div>
+    <div class="kpi"><div class="kpi-title">MAJOR SURGERIES</div><div class="kpi-value" id="kpiMajor">0</div></div>
+    <div class="kpi"><div class="kpi-title">MINOR SURGERIES</div><div class="kpi-value" id="kpiMinor">0</div></div>
+    <div class="kpi"><div class="kpi-title">LOCAL ANAESTHESIA</div><div class="kpi-value" id="kpiLocal">0</div></div>
+    <div class="kpi"><div class="kpi-title">SPINAL ANAESTHESIA</div><div class="kpi-value" id="kpiSpinal">0</div></div>
+    <div class="kpi"><div class="kpi-title">GENERAL ANAESTHESIA</div><div class="kpi-value" id="kpiGeneral">0</div></div>
+  </div>
 
+  <!-- Charts -->
+  <div class="charts-section">
+    <div class="chart-card"><canvas id="otChart"></canvas></div>
+    <div class="chart-card"><canvas id="wardChart"></canvas></div>
+    <div class="chart-card"><canvas id="typeChart"></canvas></div>
+    <div class="chart-card"><canvas id="anaesthesiaChart"></canvas></div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="buttons">
+    <button id="exportPDF">Export Executive Summary PDF</button>
+    <button id="reloadPage">Refresh / Reload</button>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Developed By: <a href="https://www.linkedin.com/in/smus79" target="_blank">Software Engineer MUHAMMAD UMAIR SYED (IT Officer, Sadiq Abbasi Hospital, Bahawalpur)</a>
+  </div>
 </div>
 
 <script>
-/* ======= CLOCK ======= */
-function updateClock() {
+// ===== Real-time Clock =====
+function updateClock(){
   const now = new Date();
-  document.getElementById('time').textContent = now.toLocaleTimeString();
-  document.getElementById('date').textContent = now.toLocaleDateString();
+  const options = {weekday:'long', year:'numeric', month:'short', day:'numeric'};
+  document.getElementById('clock').textContent = now.toLocaleDateString('en-US', options) + ' ' + now.toLocaleTimeString('en-US');
 }
-setInterval(updateClock, 1000);
+setInterval(updateClock,1000);
 updateClock();
 
-/* ======= DATA LOAD ======= */
-let rawData = [];
-let filteredData = [];
-let charts = {};
+// ===== Load Google Sheet Data =====
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
+let rawData = [], filteredData = [], charts={};
 
-function getCSVUrl() {
-  // ← Make sure your Google Sheet is "Published to web" as CSV
-  return `https://docs.google.com/spreadsheets/d/e/YOUR_SHEET_ID_HERE/pub?output=csv`;
-}
-
-function loadData() {
-  Papa.parse(getCSVUrl(), {
-    download: true,
-    header: true,
-    dynamicTyping: true,
-    skipEmptyLines: true,
-    complete: function(results) {
+function loadData(){
+  Papa.parse(sheetURL,{download:true,header:true,dynamicTyping:true,skipEmptyLines:true,
+    complete:function(results){
       rawData = results.data;
-      document.getElementById('loading').style.display = 'none';
-      initFilters();
+      document.getElementById('loading').style.display='none';
+      setDefaultDates();
       applyFilters();
+      attachFilterEvents();
     },
-    error: function(err) {
-      document.getElementById('loading').textContent = 'Error loading data.';
-      console.error(err);
-    }
+    error:function(err){document.getElementById('loading').textContent='Error loading data.'; console.error(err);}
   });
 }
 
-/* ======= FILTER LOGIC ======= */
-function initFilters() {
-  fillFilter('OT', 'otFilter');
-  fillFilter('WARD', 'wardFilter');
-  const dates = rawData.map(r => new Date(r.Date)).filter(d => !isNaN(d));
-  if (dates.length) {
+// ===== Default From/To Dates =====
+function setDefaultDates(){
+  const dates = rawData.map(r=>new Date(r.Date)).filter(d=>!isNaN(d));
+  if(dates.length){
     document.getElementById('fromDate').value = new Date(Math.min(...dates)).toISOString().split('T')[0];
     document.getElementById('toDate').value = new Date(Math.max(...dates)).toISOString().split('T')[0];
   }
-
-  ['otFilter','wardFilter','genderFilter','ageFilter','typeFilter','fromDate','toDate']
-    .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
 }
 
-function fillFilter(field, elementId) {
-  const container = document.getElementById(elementId);
-  const unique = [...new Set(rawData.map(r => r[field]).filter(v => v))].sort();
-  unique.forEach(v => container.insertAdjacentHTML('beforeend', `<option>${v}</option>`));
+// ===== Filter Logic =====
+function attachFilterEvents(){
+  ['otFilter','wardFilter','genderFilter','ageFilter','typeFilter','fromDate','toDate'].forEach(id=>{
+    document.getElementById(id).addEventListener('change',applyFilters);
+  });
 }
-
-function applyFilters() {
-  const ot   = document.getElementById('otFilter').value;
-  const wd   = document.getElementById('wardFilter').value;
-  const gndr = document.getElementById('genderFilter').value;
-  const ageF = document.getElementById('ageFilter').value;
-  const typ  = document.getElementById('typeFilter').value;
-  const from = new Date(document.getElementById('fromDate').value);
-  const to   = new Date(document.getElementById('toDate').value);
-
-  filteredData = rawData.filter(r => {
-    const dt = new Date(r.Date);
-    if (isNaN(dt)) return false;
-    if (dt < from || dt > to) return false;
-    if (ot !== 'ALL' && r.OT !== ot) return false;
-    if (wd !== 'ALL' && r.WARD !== wd) return false;
-    if (gndr !== 'ALL' && r.GENDER !== gndr) return false;
-    if (typ !== 'ALL' && r.TYPE !== typ) return false;
-
-    if (ageF !== 'ALL') {
-      const ageGroup = getAgeGroup(r.AGE);
-      if (ageGroup !== ageF) return false;
+function applyFilters(){
+  const ot=document.getElementById('otFilter').value;
+  const ward=document.getElementById('wardFilter').value;
+  const gender=document.getElementById('genderFilter').value;
+  const ageF=document.getElementById('ageFilter').value;
+  const type=document.getElementById('typeFilter').value;
+  const from=new Date(document.getElementById('fromDate').value);
+  const to=new Date(document.getElementById('toDate').value);
+  filteredData = rawData.filter(r=>{
+    const dt=new Date(r.Date);
+    if(isNaN(dt)||dt<from||dt>to) return false;
+    if(ot!=='ALL' && r.OT!==ot) return false;
+    if(ward!=='ALL' && r.WARD!==ward) return false;
+    if(gender!=='ALL' && r.GENDER!==gender) return false;
+    if(type!=='ALL' && r.TYPE!==type) return false;
+    if(ageF!=='ALL'){
+      const age=parseFloat(r.AGE);
+      const group = ageGroup(age);
+      if(group!==ageF) return false;
     }
-
     return true;
   });
-
   updateDashboard();
 }
 
-function getAgeGroup(age) {
-  if (age < 30/365) return 'Below 30 Days';
-  if (age < 1)         return '1 Month to 1 Year';
-  if (age < 15)        return '1 Year to 15 Years';
-  if (age < 30)        return '15 to 30 Years';
-  if (age < 45)        return '30 Years to 45 Years';
-  if (age < 60)        return '45 Years to 60 Years';
+// ===== Age Group =====
+function ageGroup(age){
+  if(age<30/365) return 'Below 30 Days';
+  if(age<1) return '1 Month to 1 Year';
+  if(age<15) return '1 Year to 15 Years';
+  if(age<30) return '15 to 30 Years';
+  if(age<45) return '30 Years to 45 Years';
+  if(age<60) return '45 Years to 60 Years';
   return '65 Years & above';
 }
 
-/* ======= KPIS & CHARTS ======= */
-function updateDashboard() {
-  updateKPIs();
-  updateCharts();
+// ===== Update Dashboard =====
+function updateDashboard(){
+  // KPIs
+  document.getElementById('kpiTotal').textContent = filteredData.length;
+  document.getElementById('kpiMale').textContent = filteredData.filter(r=>r.GENDER==='MALE').length;
+  document.getElementById('kpiFemale').textContent = filteredData.filter(r=>r.GENDER==='FEMALE').length;
+  document.getElementById('kpiMajor').textContent = filteredData.filter(r=>r.TYPE==='MAJOR').length;
+  document.getElementById('kpiMinor').textContent = filteredData.filter(r=>r.TYPE==='MINOR').length;
+  document.getElementById('kpiLocal').textContent = filteredData.filter(r=>/LOCAL/i.test(r.ANAESTHESIA)).length;
+  document.getElementById('kpiSpinal').textContent = filteredData.filter(r=>/SPINAL/i.test(r.ANAESTHESIA)).length;
+  document.getElementById('kpiGeneral').textContent = filteredData.filter(r=>/GENERAL|GA/i.test(r.ANAESTHESIA)).length;
+
+  // Charts
+  renderChart('otChart',countBy('OT'));
+  renderChart('wardChart',countBy('WARD'));
+  renderChart('typeChart',countBy('TYPE'));
+  const anaes={};
+  filteredData.forEach(r=>{
+    const a=(r.ANAESTHESIA||'Unknown').toUpperCase();
+    const key=/LOCAL/.test(a)?'LOCAL':/SPINAL/.test(a)?'SPINAL':/GENERAL|GA/.test(a)?'GENERAL':a;
+    anaes[key]=(anaes[key]||0)+1;
+  });
+  renderChart('anaesthesiaChart',anaes);
 }
 
-function updateKPIs() {
-  document.getElementById('kpiTotal').textContent  = filteredData.length;
-  document.getElementById('kpiMale').textContent   =
-    filteredData.filter(r => r.GENDER === 'MALE').length;
-  document.getElementById('kpiFemale').textContent =
-    filteredData.filter(r => r.GENDER === 'FEMALE').length;
-  document.getElementById('kpiMajor').textContent =
-    filteredData.filter(r => r.TYPE === 'MAJOR').length;
-  document.getElementById('kpiMinor').textContent =
-    filteredData.filter(r => r.TYPE === 'MINOR').length;
-
-  document.getElementById('kpiLocal').textContent =
-    filteredData.filter(r => /LOCAL/i.test(r.ANAESTHESIA)).length;
-  document.getElementById('kpiSpinal').textContent =
-    filteredData.filter(r => /SPINAL/i.test(r.ANAESTHESIA)).length;
-  document.getElementById('kpiGeneral').textContent =
-    filteredData.filter(r => /GENERAL|GA/i.test(r.ANAESTHESIA)).length;
-}
-
-function countBy(field) {
-  return filteredData.reduce((obj, row) => {
-    const key = row[field] || 'Unknown';
-    obj[key] = (obj[key]||0) + 1;
+// ===== Count by Field =====
+function countBy(field){
+  return filteredData.reduce((obj,row)=>{
+    const key = row[field]||'Unknown';
+    obj[key]=(obj[key]||0)+1;
     return obj;
-  }, {});
+  },{});
 }
 
-function renderChart(id, data) {
-  if (charts[id]) charts[id].destroy();
-  const ctx = document.getElementById(id).getContext('2d');
-  charts[id] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: Object.keys(data),
-      datasets: [{
-        label: '#',
-        data: Object.values(data),
-        backgroundColor: '#0066cc'
-      }]
-    }
+// ===== Render Chart =====
+function renderChart(id,data){
+  if(charts[id]) charts[id].destroy();
+  const ctx=document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx,{
+    type:'bar',
+    data:{labels:Object.keys(data),datasets:[{label:'#',data:Object.values(data),backgroundColor:['#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f','#edc949','#af7aa1','#ff9da7','#9c755f','#bab0ab']}]},
+    options:{responsive:true, plugins:{legend:{display:false}}}
   });
 }
 
-function updateCharts() {
-  renderChart('otChart', countBy('OT'));
-  renderChart('wardChart', countBy('WARD'));
-  renderChart('typeChart', countBy('TYPE'));
-
-  const anaes = {};
-  filteredData.forEach(r => {
-    const a = (r.ANAESTHESIA||'Unknown').toUpperCase();
-    const key = /LOCAL/.test(a)? 'LOCAL' : /SPINAL/.test(a)? 'SPINAL' : /GENERAL|GA/.test(a) ? 'GENERAL' : a;
-    anaes[key] = (anaes[key]||0) + 1;
+// ===== PDF Export =====
+document.getElementById('exportPDF').addEventListener('click',()=>{
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let y=20;
+  doc.setFontSize(16);
+  doc.text("Sadiq Abbasi Hospital, Bahawalpur",105,y,{align:'center'}); y+=10;
+  doc.setFontSize(12);
+  doc.text("Surgery Executive Summary",105,y,{align:'center'}); y+=10;
+  const kpis=['TOTAL SURGERIES','MALE SURGERIES','FEMALE SURGERIES','MAJOR SURGERIES','MINOR SURGERIES','LOCAL ANAESTHESIA','SPINAL ANAESTHESIA','GENERAL ANAESTHESIA'];
+  kpis.forEach(k=>{
+    const val=document.getElementById('kpi'+k.replace(/\s/g,'')).textContent;
+    doc.text(`${k}: ${val}`,20,y); y+=8;
   });
-  renderChart('anaesthesiaChart', anaes);
-}
+  y+=5;
+  doc.text("Summary Paragraph: Data displayed above reflects selected criteria and filtered results.",20,y);
+  doc.save('Executive_Summary.pdf');
+});
 
-/* ======= START ======= */
-window.onload = loadData;
+// ===== Reload =====
+document.getElementById('reloadPage').addEventListener('click',()=>location.reload());
+
+// ===== Start =====
+window.onload=loadData;
 </script>
-
 </body>
 </html>
