@@ -205,132 +205,190 @@ const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9
 
 let rawData=[];
 
+// ============================
+// LOAD DATA
+// ============================
 Papa.parse(sheetURL,{
-download:true,
-header:true,
-skipEmptyLines:true,
-complete:function(results){
-rawData=results.data;
-applyFilters();
-}
+    download:true,
+    header:true,
+    skipEmptyLines:true,
+    complete:function(results){
+        rawData = results.data.map(row=>{
+            return {
+                ...row,
+                parsedDate: normalizeDate(row["Date"])
+            };
+        });
+        applyFilters();
+    }
 });
 
-function parseDate(dateStr){
-if(!dateStr) return null;
+// ============================
+// DATE NORMALIZER (ROBUST)
+// ============================
+function normalizeDate(dateStr){
 
-// Handle different formats
-if(dateStr.includes("/")){
-let parts=dateStr.split("/");
-if(parts[2].length===4)
-return new Date(parts[2],parts[1]-1,parts[0]);
-}
-return new Date(dateStr);
+    if(!dateStr) return null;
+
+    // If already valid ISO
+    if(!isNaN(Date.parse(dateStr))){
+        let d = new Date(dateStr);
+        d.setHours(0,0,0,0);
+        return d;
+    }
+
+    // Handle DD/MM/YYYY
+    if(dateStr.includes("/")){
+        let parts = dateStr.split("/");
+        if(parts.length === 3){
+            let day = parseInt(parts[0]);
+            let month = parseInt(parts[1]) - 1;
+            let year = parseInt(parts[2]);
+            let d = new Date(year,month,day);
+            d.setHours(0,0,0,0);
+            return d;
+        }
+    }
+
+    return null;
 }
 
+// ============================
+// APPLY FILTERS
+// ============================
 function applyFilters(){
 
-let data=rawData;
+    const ot=document.getElementById("otFilter").value;
+    const ward=document.getElementById("wardFilter").value;
+    const gender=document.getElementById("genderFilter").value;
+    const type=document.getElementById("typeFilter").value;
+    const from=document.getElementById("fromDate").value;
+    const to=document.getElementById("toDate").value;
 
-const ot=document.getElementById("otFilter").value;
-const ward=document.getElementById("wardFilter").value;
-const gender=document.getElementById("genderFilter").value;
-const type=document.getElementById("typeFilter").value;
-const from=document.getElementById("fromDate").value;
-const to=document.getElementById("toDate").value;
+    let fromDate = from ? new Date(from) : null;
+    let toDate = to ? new Date(to) : null;
 
-data=data.filter(r=>{
+    if(fromDate) fromDate.setHours(0,0,0,0);
+    if(toDate) {
+        toDate.setHours(23,59,59,999); // inclusive full day
+    }
 
-let recordDate=parseDate(r["Date"]);
-let fromDate=from? new Date(from):null;
-let toDate=to? new Date(to):null;
+    let filtered = rawData.filter(r=>{
 
-return(
-(ot==="ALL OTS" || r["OT"]===ot) &&
-(ward==="ALL WARDS" || r["WARD"]===ward) &&
-(gender==="ALL GENDERS" || r["GENDER"]===gender) &&
-(type==="ALL TYPES" || r["TYPE"]===type) &&
-(!fromDate || recordDate>=fromDate) &&
-(!toDate || recordDate<=toDate)
-);
-});
+        // DATE CHECK
+        let dateMatch = true;
 
-updateDashboard(data);
+        if(fromDate && (!r.parsedDate || r.parsedDate < fromDate)){
+            dateMatch = false;
+        }
+
+        if(toDate && (!r.parsedDate || r.parsedDate > toDate)){
+            dateMatch = false;
+        }
+
+        return (
+            dateMatch &&
+            (ot==="ALL OTS" || r["OT"]===ot) &&
+            (ward==="ALL WARDS" || r["WARD"]===ward) &&
+            (gender==="ALL GENDERS" || r["GENDER"]===gender) &&
+            (type==="ALL TYPES" || r["TYPE"]===type)
+        );
+
+    });
+
+    updateDashboard(filtered);
 }
 
 document.querySelectorAll("select,input").forEach(el=>{
-el.addEventListener("change",applyFilters);
+    el.addEventListener("change",applyFilters);
 });
 
+// ============================
+// DASHBOARD UPDATE
+// ============================
 function updateDashboard(data){
 
-document.getElementById("totalKPI").innerText=data.length;
-document.getElementById("maleKPI").innerText=data.filter(r=>r["GENDER"]==="MALE").length;
-document.getElementById("femaleKPI").innerText=data.filter(r=>r["GENDER"]==="FEMALE").length;
-document.getElementById("majorKPI").innerText=data.filter(r=>r["TYPE"]==="MAJOR").length;
-document.getElementById("minorKPI").innerText=data.filter(r=>r["TYPE"]==="MINOR").length;
-document.getElementById("localKPI").innerText=data.filter(r=>r["ANAESTHESIA"]==="LOCAL").length;
-document.getElementById("spinalKPI").innerText=data.filter(r=>r["ANAESTHESIA"]==="SPINAL").length;
-document.getElementById("generalKPI").innerText=data.filter(r=>r["ANAESTHESIA"]==="GENERAL").length;
+    document.getElementById("totalKPI").innerText=data.length;
+    document.getElementById("maleKPI").innerText=data.filter(r=>r["GENDER"]==="MALE").length;
+    document.getElementById("femaleKPI").innerText=data.filter(r=>r["GENDER"]==="FEMALE").length;
+    document.getElementById("majorKPI").innerText=data.filter(r=>r["TYPE"]==="MAJOR").length;
+    document.getElementById("minorKPI").innerText=data.filter(r=>r["TYPE"]==="MINOR").length;
+    document.getElementById("localKPI").innerText=data.filter(r=>r["ANAESTHESIA"]==="LOCAL").length;
+    document.getElementById("spinalKPI").innerText=data.filter(r=>r["ANAESTHESIA"]==="SPINAL").length;
+    document.getElementById("generalKPI").innerText=data.filter(r=>r["ANAESTHESIA"]==="GENERAL").length;
 
-createChart("otChart",countBy(data,"OT"));
-createChart("wardChart",countBy(data,"WARD"));
-createChart("typeChart",countBy(data,"TYPE"));
-createChart("anaChart",countBy(data,"ANAESTHESIA"));
+    createChart("otChart",countBy(data,"OT"));
+    createChart("wardChart",countBy(data,"WARD"));
+    createChart("typeChart",countBy(data,"TYPE"));
+    createChart("anaChart",countBy(data,"ANAESTHESIA"));
 }
 
+// ============================
+// GROUPING FUNCTION
+// ============================
 function countBy(data,key){
-let obj={};
-data.forEach(r=>{
-let val=r[key]||"Unknown";
-obj[val]=(obj[val]||0)+1;
-});
-return obj;
+    let obj={};
+    data.forEach(r=>{
+        let val=r[key]||"Unknown";
+        obj[val]=(obj[val]||0)+1;
+    });
+    return obj;
 }
 
+// ============================
+// CHART FUNCTION
+// ============================
 function createChart(id,dataObj){
-const ctx=document.getElementById(id);
-if(ctx.chart) ctx.chart.destroy();
+    const ctx=document.getElementById(id);
+    if(ctx.chart) ctx.chart.destroy();
 
-ctx.chart=new Chart(ctx,{
-type:'bar',
-data:{
-labels:Object.keys(dataObj),
-datasets:[{
-data:Object.values(dataObj),
-backgroundColor:[
-'#007bff','#28a745','#ffc107','#dc3545',
-'#17a2b8','#6f42c1','#fd7e14','#20c997'
-]
-}]
-},
-options:{
-responsive:true,
-maintainAspectRatio:false,
-plugins:{legend:{display:false}},
-scales:{y:{beginAtZero:true}}
-}
-});
-}
-
-function exportPDF(){
-html2pdf().from(document.body).set({
-margin:5,
-filename:'Executive_Summary.pdf',
-html2canvas:{scale:2},
-jsPDF:{orientation:'portrait',unit:'mm',format:'a4'}
-}).save();
+    ctx.chart=new Chart(ctx,{
+        type:'bar',
+        data:{
+            labels:Object.keys(dataObj),
+            datasets:[{
+                data:Object.values(dataObj),
+                backgroundColor:[
+                    '#007bff','#28a745','#ffc107','#dc3545',
+                    '#17a2b8','#6f42c1','#fd7e14','#20c997'
+                ]
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{legend:{display:false}},
+            scales:{y:{beginAtZero:true}}
+        }
+    });
 }
 
+// ============================
+// CLOCK
+// ============================
 function updateClock(){
-const now=new Date();
-document.getElementById("clock").innerHTML=
-now.toLocaleDateString()+"<br>"+
-now.toLocaleTimeString();
+    const now=new Date();
+    document.getElementById("clock").innerHTML=
+        now.toLocaleDateString()+"<br>"+
+        now.toLocaleTimeString();
 }
 setInterval(updateClock,1000);
 updateClock();
+
+// ============================
+// PDF EXPORT
+// ============================
+function exportPDF(){
+    html2pdf().from(document.body).set({
+        margin:5,
+        filename:'Executive_Summary.pdf',
+        html2canvas:{scale:2},
+        jsPDF:{orientation:'portrait',unit:'mm',format:'a4'}
+    }).save();
+}
 
 </script>
 
 </body>
 </html>
+
