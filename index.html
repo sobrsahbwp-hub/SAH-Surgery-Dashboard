@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>SADIQ ABBASI HOSPITAL - Surgery Dashboard</title>
@@ -9,10 +9,10 @@
 
 <style>
 body{
-    font-family: 'Segoe UI', sans-serif;
     margin:0;
-    background:#f4f9fd;
-    color:#1a1a1a;
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(to right,#f4f9ff,#eef5fb);
+    color:#222;
 }
 header{
     text-align:center;
@@ -32,7 +32,7 @@ header{
     display:flex;
     flex-wrap:wrap;
     justify-content:center;
-    gap:20px;
+    gap:18px;
     padding:15px;
 }
 .filter-box{
@@ -41,63 +41,77 @@ header{
     min-width:160px;
 }
 label{
+    font-size:13px;
     font-weight:600;
     margin-bottom:4px;
 }
 select,input{
     padding:6px;
-    border:1px solid #ccc;
     border-radius:6px;
+    border:1px solid #ccc;
 }
 .kpis{
     text-align:center;
     padding:15px;
 }
 .kpi-big{
-    font-size:38px;
+    font-size:40px;
     font-weight:800;
-    color:#0077cc;
+    color:#0066cc;
 }
 .kpi-row{
     display:flex;
     justify-content:center;
-    gap:50px;
-    margin-top:10px;
+    gap:60px;
+    margin-top:12px;
     flex-wrap:wrap;
 }
 .kpi{
-    font-size:16px;
     font-weight:600;
+    font-size:15px;
 }
 .chart-row{
     display:flex;
     justify-content:center;
-    gap:40px;
+    gap:60px;
+    margin:30px 0;
     flex-wrap:wrap;
-    margin:25px 0;
+}
+.chart-container{
+    width:340px;
+    height:340px;
 }
 canvas{
-    max-width:350px;
+    width:100% !important;
+    height:100% !important;
 }
 .buttons{
     display:flex;
     justify-content:space-between;
     padding:20px;
 }
+button{
+    padding:8px 14px;
+    border:none;
+    border-radius:6px;
+    background:#0077cc;
+    color:white;
+    cursor:pointer;
+}
+button:hover{
+    background:#005fa3;
+}
 footer{
     text-align:center;
     padding:12px;
     font-size:13px;
-    background:#e8f1f8;
+    background:#e9f2fb;
 }
 @media(max-width:768px){
     .chart-row{flex-direction:column;align-items:center;}
 }
 @media print{
-    body{
-        width:210mm;
-        height:297mm;
-    }
+    body{width:210mm;height:297mm;}
 }
 </style>
 </head>
@@ -113,37 +127,37 @@ DATA of SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)
 <div class="filter-box">
 <label>OT</label>
 <select id="otFilter">
-<option>ALL OTS</option>
-<option>MAIN OT</option>
-<option>GYNAE OT</option>
+<option value="ALL">ALL OTS</option>
+<option value="MAIN OT">MAIN OT</option>
+<option value="GYNAE OT">GYNAE OT</option>
 </select>
 </div>
 
 <div class="filter-box">
 <label>WARD</label>
 <select id="wardFilter">
-<option>ALL WARDS</option>
-<option>GYNAE</option>
-<option>ORTHO</option>
-<option>SURGERY</option>
-<option>EYE</option>
+<option value="ALL">ALL WARDS</option>
+<option value="GYNAE">GYNAE</option>
+<option value="ORTHO">ORTHO</option>
+<option value="SURGERY">SURGERY</option>
+<option value="EYE">EYE</option>
 </select>
 </div>
 
 <div class="filter-box">
 <label>Gender</label>
 <select id="genderFilter">
-<option>ALL GENDERS</option>
-<option>MALE</option>
-<option>FEMALE</option>
-<option>TRANSGENDER</option>
+<option value="ALL">ALL GENDERS</option>
+<option value="MALE">MALE</option>
+<option value="FEMALE">FEMALE</option>
+<option value="TRANSGENDER">TRANSGENDER</option>
 </select>
 </div>
 
 <div class="filter-box">
 <label>Age Group</label>
 <select id="ageFilter">
-<option>ALL</option>
+<option value="ALL">ALL</option>
 <option>Below 30 Days</option>
 <option>1 Month to 1 Year</option>
 <option>1 Year to 15 Years</option>
@@ -157,9 +171,9 @@ DATA of SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)
 <div class="filter-box">
 <label>Surgery Type</label>
 <select id="typeFilter">
-<option>ALL TYPES</option>
-<option>MAJOR</option>
-<option>MINOR</option>
+<option value="ALL">ALL TYPES</option>
+<option value="MAJOR">MAJOR</option>
+<option value="MINOR">MINOR</option>
 </select>
 </div>
 
@@ -175,7 +189,6 @@ DATA of SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)
 </div>
 
 <div id="summarySection" class="kpis">
-
 <div class="kpi-big" id="totalSurgeries">0</div>
 <div><b>Total Surgeries</b></div>
 
@@ -196,18 +209,17 @@ DATA of SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)
 </div>
 
 <br>
-<div id="execText" style="max-width:800px;margin:auto;font-size:14px;"></div>
-
+<div id="execSummary" style="max-width:800px;margin:auto;font-size:14px;"></div>
 </div>
 
 <div class="chart-row">
-<canvas id="otChart"></canvas>
-<canvas id="wardChart"></canvas>
+<div class="chart-container"><canvas id="otChart"></canvas></div>
+<div class="chart-container"><canvas id="wardChart"></canvas></div>
 </div>
 
 <div class="chart-row">
-<canvas id="typeChart"></canvas>
-<canvas id="anaChart"></canvas>
+<div class="chart-container"><canvas id="typeChart"></canvas></div>
+<div class="chart-container"><canvas id="anaChart"></canvas></div>
 </div>
 
 <div class="buttons">
@@ -216,7 +228,7 @@ DATA of SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)
 </div>
 
 <footer>
-Developed By: 
+Developed By:
 <a href="https://www.linkedin.com/in/smus79" target="_blank">
 Software Engineer MUHAMMAD UMAIR SYED (IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
 </a>
@@ -224,25 +236,29 @@ Software Engineer MUHAMMAD UMAIR SYED (IT Officer, Sadiq Abbasi Hospital, Bahawa
 
 <script>
 
-let rawData=[];
-let otChart, wardChart, typeChart, anaChart;
-
 const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
+
+let rawData=[];
+let charts={};
+
+function normalize(val){
+    return val ? val.toString().trim().toUpperCase() : "";
+}
 
 fetch(sheetURL)
 .then(res=>res.text())
-.then(data=>{
-    const rows=data.split("\n").slice(1);
+.then(csv=>{
+    const rows=csv.split("\n").slice(1);
     rawData=rows.map(r=>{
-        const cols=r.split(",");
+        const c=r.split(",");
         return{
-            ot:cols[1],
-            ward:cols[2],
-            date:new Date(cols[3]),
-            gender:cols[6],
-            age:parseInt(cols[7]),
-            anaesthesia:cols[29],
-            type:cols[30]
+            ot:normalize(c[1]),
+            ward:normalize(c[2]),
+            date:new Date(c[3]),
+            gender:normalize(c[6]),
+            age:parseFloat(c[7]),
+            anaesthesia:normalize(c[29]),
+            type:normalize(c[30])
         }
     });
     updateDashboard();
@@ -253,8 +269,8 @@ document.querySelectorAll("select,input").forEach(el=>{
 });
 
 function getAgeGroup(age){
-    if(age<0) return null;
-    if(age<1/12) return "Below 30 Days";
+    if(isNaN(age)) return "";
+    if(age<0.08) return "Below 30 Days";
     if(age<1) return "1 Month to 1 Year";
     if(age<=15) return "1 Year to 15 Years";
     if(age<=30) return "15 to 30 Years";
@@ -265,11 +281,10 @@ function getAgeGroup(age){
 
 function filterData(){
     return rawData.filter(r=>{
-        let otF=otFilter.value==="ALL OTS"||r.ot===otFilter.value;
-        let wardF=wardFilter.value==="ALL WARDS"||r.ward===wardFilter.value;
-        let genderF=genderFilter.value==="ALL GENDERS"||r.gender===genderFilter.value;
-        let typeF=typeFilter.value==="ALL TYPES"||r.type===typeFilter.value;
-
+        let otF=otFilter.value==="ALL"||r.ot===normalize(otFilter.value);
+        let wardF=wardFilter.value==="ALL"||r.ward===normalize(wardFilter.value);
+        let genderF=genderFilter.value==="ALL"||r.gender===normalize(genderFilter.value);
+        let typeF=typeFilter.value==="ALL"||r.type===normalize(typeFilter.value);
         let ageF=ageFilter.value==="ALL"||getAgeGroup(r.age)===ageFilter.value;
 
         let from=fromDate.value?new Date(fromDate.value):null;
@@ -277,6 +292,29 @@ function filterData(){
         let dateF=(!from||r.date>=from)&&(!to||r.date<=to);
 
         return otF&&wardF&&genderF&&typeF&&ageF&&dateF;
+    });
+}
+
+function countBy(data,key){
+    return data.reduce((a,b)=>{
+        if(!b[key]) return a;
+        a[b[key]]=(a[b[key]]||0)+1;
+        return a;
+    },{});
+}
+
+function buildPie(id,dataObj){
+    if(charts[id]) charts[id].destroy();
+    charts[id]=new Chart(document.getElementById(id),{
+        type:"pie",
+        data:{
+            labels:Object.keys(dataObj),
+            datasets:[{
+                data:Object.values(dataObj),
+                backgroundColor:["#0077cc","#00aaff","#33cc99","#ff9933","#cc66ff","#ff6666"]
+            }]
+        },
+        options:{plugins:{legend:{position:"bottom"}}}
     });
 }
 
@@ -291,56 +329,22 @@ function updateDashboard(){
     majorCount.innerText="Major: "+data.filter(d=>d.type==="MAJOR").length;
     minorCount.innerText="Minor: "+data.filter(d=>d.type==="MINOR").length;
 
-    localCount.innerText="Local: "+data.filter(d=>d.anaesthesia==="LOCAL").length;
-    spinalCount.innerText="Spinal: "+data.filter(d=>d.anaesthesia==="SPINAL").length;
-    generalCount.innerText="General: "+data.filter(d=>d.anaesthesia==="GENERAL").length;
+    localCount.innerText="Local: "+data.filter(d=>d.anaesthesia.includes("LOCAL")).length;
+    spinalCount.innerText="Spinal: "+data.filter(d=>d.anaesthesia.includes("SPINAL")).length;
+    generalCount.innerText="General: "+data.filter(d=>d.anaesthesia.includes("GENERAL")).length;
 
-    execText.innerHTML=
+    execSummary.innerHTML=
     "<b>Executive Summary:</b><br>"+
     "Total "+data.length+" surgeries performed under selected criteria. "+
-    "Major cases: "+data.filter(d=>d.type==='MAJOR').length+
-    ", Minor cases: "+data.filter(d=>d.type==='MINOR').length+
+    "Major: "+data.filter(d=>d.type==='MAJOR').length+
+    ", Minor: "+data.filter(d=>d.type==='MINOR').length+
     ". Male: "+data.filter(d=>d.gender==='MALE').length+
     ", Female: "+data.filter(d=>d.gender==='FEMALE').length+".";
 
-    buildCharts(data);
-}
-
-function buildPie(ctx,label,dataObj){
-    return new Chart(ctx,{
-        type:'pie',
-        data:{
-            labels:Object.keys(dataObj),
-            datasets:[{
-                data:Object.values(dataObj),
-                backgroundColor:['#0077cc','#00aaff','#66c2ff','#ff9933','#33cc99','#cc66ff']
-            }]
-        },
-        options:{
-            plugins:{
-                legend:{position:'bottom'}
-            }
-        }
-    });
-}
-
-function countBy(data,key){
-    return data.reduce((a,b)=>{
-        a[b[key]]=(a[b[key]]||0)+1;
-        return a;
-    },{});
-}
-
-function buildCharts(data){
-    if(otChart) otChart.destroy();
-    if(wardChart) wardChart.destroy();
-    if(typeChart) typeChart.destroy();
-    if(anaChart) anaChart.destroy();
-
-    otChart=buildPie(otChart=document.getElementById("otChart"),"OT",countBy(data,"ot"));
-    wardChart=buildPie(wardChart=document.getElementById("wardChart"),"WARD",countBy(data,"ward"));
-    typeChart=buildPie(typeChart=document.getElementById("typeChart"),"TYPE",countBy(data,"type"));
-    anaChart=buildPie(anaChart=document.getElementById("anaChart"),"ANAESTHESIA",countBy(data,"anaesthesia"));
+    buildPie("otChart",countBy(data,"ot"));
+    buildPie("wardChart",countBy(data,"ward"));
+    buildPie("typeChart",countBy(data,"type"));
+    buildPie("anaChart",countBy(data,"anaesthesia"));
 }
 
 function exportPDF(){
