@@ -1,506 +1,334 @@
-<!FINAL TEST DASHBOARD CODE>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SADIQ ABBASI HOSPITAL – Surgical Dashboard</title>
+<title>SADIQ ABBASI HOSPITAL – Executive Surgical Dashboard</title>
 
-<!-- Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-/* General */
-body {
-    margin: 0;
-    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-    background: #f8fafc;
-    color: #1f2937;
+body{
+    margin:0;
+    font-family:Segoe UI, Arial;
+    background:#f1f5f9;
+    color:#1e293b;
 }
 
-/* Header */
-header {
-    text-align: center;
-    padding: 20px;
-    background: #e2e8f0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+/* HEADER */
+header{
+    background:#e2e8f0;
+    padding:15px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
 }
 
-header img {
-    height: 90px;
+header img{height:75px;}
+header h1{margin:0;font-size:22px;color:#1e3a8a;text-align:center;}
+
+#clock{
+    position:absolute;
+    right:20px;
+    top:20px;
+    font-weight:600;
+    font-size:14px;
 }
 
-header h1 {
-    margin: 10px 0 0;
-    font-size: 26px;
-    letter-spacing: 1px;
-    color: #1e3a8a;
+/* CONTAINER */
+.container{padding:20px;}
+
+.filters{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:12px;
+    margin-bottom:25px;
 }
 
-/* Container */
-.container {
-    padding: 20px;
-}
-
-/* Filters */
-.filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 12px;
-    margin-bottom: 25px;
-}
-
-.filter-box label {
-    display: block;
-    font-size: 13px;
-    margin-bottom: 4px;
-    color: #1e40af;
+.filter-box label{
+    font-size:12px;
+    font-weight:600;
+    color:#1e40af;
 }
 
 .filter-box select,
-.filter-box input {
-    width: 100%;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #cbd5e1;
-    background: #fff;
-    color: #1f2937;
+.filter-box input{
+    width:100%;
+    padding:8px;
+    border-radius:6px;
+    border:1px solid #cbd5e1;
 }
 
-/* KPIs */
-.kpis {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
-    gap: 16px;
-    margin-bottom: 30px;
+/* KPI */
+.kpis{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:15px;
+    margin-bottom:30px;
 }
 
-.kpi {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.kpi{
+    background:white;
+    padding:18px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
 }
 
-.kpi h2 {
-    font-size: 28px;
-    margin: 0;
-    color: #2563eb;
+.kpi h2{
+    margin:0;
+    font-size:26px;
+    color:#2563eb;
 }
 
-.kpi p {
-    margin: 6px 0 0;
-    font-size: 14px;
-    color: #475569;
+/* CHARTS */
+.charts{
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    justify-content:center;
 }
 
-/* Charts */
-.charts {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
+.chart-box{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    width:100%;
+    max-width:500px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
 }
 
-.chart-box {
-    width: 100%;
-    max-width: 450px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+footer{
+    margin-top:30px;
+    background:#e2e8f0;
+    padding:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
-/* Footer */
-footer {
-    margin-top: 30px;
-    padding: 15px;
-    background: #e2e8f0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
+button{
+    padding:8px 14px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
 }
 
-footer a {
-    color: #2563eb;
-    text-decoration: none;
+#pdfBtn{background:#16a34a;color:white;}
+#reloadBtn{background:#2563eb;color:white;}
+
+@media(max-width:768px){
+    header{flex-direction:column;}
+    #clock{position:static;margin-top:8px;}
+    footer{flex-direction:column;gap:8px;text-align:center;}
 }
-
-/* Buttons */
-button {
-    padding: 10px 16px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-#pdfBtn {
-    background: #16a34a;
-    color: #fff;
-}
-
-#reloadBtn {
-    background: #2563eb;
-    color: #fff;
-}
-
-/* ===== Improved Mobile Responsiveness ===== */
-@media (max-width: 768px) {
-
-    /* Header */
-    header {
-        padding: 12px;
-    }
-
-    header img {
-        height: 65px;
-    }
-
-    header h1 {
-        font-size: 18px;
-        line-height: 1.3;
-    }
-
-    /* Filters */
-    .filters {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .filter-box select,
-    .filter-box input {
-        padding: 10px;
-        font-size: 14px;
-    }
-
-    /* KPIs – 2 per row on mobile */
-    .kpis {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-
-    .kpi {
-        padding: 14px;
-    }
-
-    .kpi h2 {
-        font-size: 22px;
-    }
-
-    .kpi p {
-        font-size: 12px;
-    }
-
-    /* Charts */
-    .charts {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .chart-box {
-        width: 100%;
-        max-width: 100%;
-        padding: 15px;
-    }
-
-    canvas {
-        width: 100% !important;
-        height: auto !important;
-    }
-
-    /* Footer */
-    footer {
-        flex-direction: column;
-        align-items: stretch;
-        text-align: center;
-    }
-
-    footer button {
-        width: 100%;
-        margin-bottom: 8px;
-    }
-
-    footer div {
-        font-size: 13px;
-        line-height: 1.4;
-    }
-}
-
-/* Extra small phones */
-@media (max-width: 400px) {
-    .kpis {
-        grid-template-columns: 1fr;
-    }
-}
-
 </style>
 </head>
 
 <body>
 
 <header>
-    <img src="https://drive.google.com/file/d/1Y5PbMKEFDgSk9CiSZOAdVyxRyAse6hXU/view?usp=sharing">
-    <h1>SADIQ ABBASI HOSPITAL, BAHAWALPUR</h1>
+<div style="text-align:center;">
+<img src="https://drive.google.com/uc?export=view&id=1Y5PbMKEFDgSk9CiSZOAdVyxRyAse6hXU">
+<h1>SADIQ ABBASI HOSPITAL, BAHAWALPUR</h1>
+</div>
+<div id="clock"></div>
 </header>
 
 <div class="container" id="dashboard">
 
-    <!-- Filters -->
-    <div class="filters">
-        <div class="filter-box">
-            <label>OT</label>
-            <select id="otFilter">
-                <option value="">ALL OTS</option>
-                <option>MAIN OT</option>
-                <option>GYNAE OT</option>
-                <option>EMERGENCY OT</option>
-            </select>
-        </div>
+<div class="filters">
+<div class="filter-box">
+<label>OT</label>
+<select id="otFilter"><option value="">ALL</option></select>
+</div>
 
-        <div class="filter-box">
-            <label>Ward</label>
-            <select id="wardFilter">
-                <option value="">ALL WARDS</option>
-                <option>GYNAE</option>
-                <option>ORTHO</option>
-                <option>SURGERY</option>
-                <option>EYE</option>
-            </select>
-        </div>
+<div class="filter-box">
+<label>Ward</label>
+<select id="wardFilter"><option value="">ALL</option></select>
+</div>
 
-        <div class="filter-box">
-            <label>Gender</label>
-            <select id="genderFilter">
-                <option value="">ALL GENDERS</option>
-                <option>MALE</option>
-                <option>FEMALE</option>
-                <option>TRANSGENDER</option>
-            </select>
-        </div>
+<div class="filter-box">
+<label>Gender</label>
+<select id="genderFilter">
+<option value="">ALL</option>
+<option>MALE</option>
+<option>FEMALE</option>
+<option>TRANSGENDER</option>
+</select>
+</div>
 
-        <div class="filter-box">
-            <label>Age Group</label>
-            <select id="ageFilter">
-                <option value="">ALL AGES</option>
-                <option value="0-0.083">Below 30 Days</option>
-                <option value="0.083-1">1 Month to 1 Year</option>
-                <option value="1-15">1 Year to 15 Years</option>
-                <option value="15-30">15 to 30 Years</option>
-                <option value="30-45">30 to 45 Years</option>
-                <option value="45-200">45 Years & Above</option>
-            </select>
-        </div>
+<div class="filter-box">
+<label>Surgery Type</label>
+<select id="typeFilter">
+<option value="">ALL</option>
+<option>MAJOR</option>
+<option>MINOR</option>
+</select>
+</div>
 
-        <div class="filter-box">
-            <label>Surgery Type</label>
-            <select id="typeFilter">
-                <option value="">ALL TYPES</option>
-                <option>MAJOR</option>
-                <option>MINOR</option>
-            </select>
-        </div>
+<div class="filter-box">
+<label>From Date</label>
+<input type="date" id="fromDate">
+</div>
 
-        <div class="filter-box">
-            <label>From Date</label>
-            <input type="date" id="fromDate">
-        </div>
+<div class="filter-box">
+<label>To Date</label>
+<input type="date" id="toDate">
+</div>
+</div>
 
-        <div class="filter-box">
-            <label>To Date</label>
-            <input type="date" id="toDate">
-        </div>
-    </div>
+<div class="kpis">
+<div class="kpi"><h2 id="total">0</h2><p>Total</p></div>
+<div class="kpi"><h2 id="male">0</h2><p>Male</p></div>
+<div class="kpi"><h2 id="female">0</h2><p>Female</p></div>
+<div class="kpi"><h2 id="major">0</h2><p>Major</p></div>
+<div class="kpi"><h2 id="minor">0</h2><p>Minor</p></div>
+</div>
 
-    <!-- KPIs -->
-    <div class="kpis">
-        <div class="kpi"><h2 id="total">0</h2><p>Total Surgeries</p></div>
-        <div class="kpi"><h2 id="male">0</h2><p>Male Surgeries</p></div>
-        <div class="kpi"><h2 id="female">0</h2><p>Female Surgeries</p></div>
-        <div class="kpi"><h2 id="major">0</h2><p>Major Surgeries</p></div>
-        <div class="kpi"><h2 id="minor">0</h2><p>Minor Surgeries</p></div>
-    </div>
-
-    <!-- Charts -->
-    <div class="charts">
-        <div class="chart-box">
-            <canvas id="otChart"></canvas>
-        </div>
-        <div class="chart-box">
-            <canvas id="wardChart"></canvas>
-        </div>
-    </div>
+<div class="charts">
+<div class="chart-box"><canvas id="otChart"></canvas></div>
+<div class="chart-box"><canvas id="wardChart"></canvas></div>
+<div class="chart-box"><canvas id="pieChart"></canvas></div>
+</div>
 
 </div>
 
 <footer>
-    <button id="pdfBtn" onclick="exportPDF()">Export to PDF</button>
-    <div>
-        Developed By:
-        <a href="https://www.linkedin.com/in/smus79" target="_blank">
-            Software Engineer MUHAMMAD UMAIR SYED
-        </a>
-        (IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
-    </div>
-    <button id="reloadBtn" onclick="location.reload()">Reload</button>
+<button id="pdfBtn" onclick="exportExecutivePDF()">Executive Summary PDF</button>
+<div>IT Department – Sadiq Abbasi Hospital</div>
+<button id="reloadBtn" onclick="location.reload()">Reload</button>
 </footer>
 
 <script>
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
+const csvUrl="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
-let rawData = [];
+let rawData=[];
+let otChart,wardChart,pieChart;
+let lastFiltered=[];
 
-Papa.parse(csvUrl, {
-    download: true,
-    header: true,
-    complete: res => {
-        rawData = res.data;
-        updateDashboard();
-    }
+/* CLOCK */
+setInterval(()=>{
+document.getElementById("clock").innerText=
+new Date().toLocaleDateString()+" | "+new Date().toLocaleTimeString();
+},1000);
+
+/* FETCH */
+Papa.parse(csvUrl,{
+download:true,
+header:true,
+skipEmptyLines:true,
+complete:res=>{
+rawData=res.data.map(r=>{
+let clean={};
+Object.keys(r).forEach(k=>{
+clean[k.trim().toUpperCase()]=r[k];
+});
+return clean;
+});
+populateFilters();
+updateDashboard();
+}
 });
 
-document.querySelectorAll("select, input[type=date]").forEach(e => e.addEventListener("change", updateDashboard));
+document.querySelectorAll("select,input").forEach(el=>{
+el.addEventListener("change",updateDashboard);
+});
 
-let otChart, wardChart;
-
-function updateDashboard() {
-    const fromDate = document.getElementById("fromDate").value ? new Date(document.getElementById("fromDate").value) : null;
-    const toDate = document.getElementById("toDate").value ? new Date(document.getElementById("toDate").value) : null;
-    const ageRange = document.getElementById("ageFilter").value.split("-").map(Number);
-
-    const data = rawData.filter(r => {
-        if (document.getElementById("otFilter").value && r.OT !== document.getElementById("otFilter").value) return false;
-        if (document.getElementById("wardFilter").value && r.WARD !== document.getElementById("wardFilter").value) return false;
-        if (document.getElementById("genderFilter").value && r.GENDER !== document.getElementById("genderFilter").value) return false;
-        if (document.getElementById("typeFilter").value && r.TYPE !== document.getElementById("typeFilter").value) return false;
-
-        // Date Filter
-        if (fromDate && new Date(r.DATE) < fromDate) return false;
-        if (toDate && new Date(r.DATE) > toDate) return false;
-
-        // Age Filter
-        if (ageRange.length === 2 && r.AGE) {
-            const age = parseFloat(r.AGE); // AGE in years (can be decimal for months)
-            if (age < ageRange[0] || age > ageRange[1]) return false;
-        }
-
-        return true;
-    });
-
-    total.innerText = data.length;
-    male.innerText = data.filter(r => r.GENDER === "MALE").length;
-    female.innerText = data.filter(r => r.GENDER === "FEMALE").length;
-    major.innerText = data.filter(r => r.TYPE === "MAJOR").length;
-    minor.innerText = data.filter(r => r.TYPE === "MINOR").length;
-
-    drawChart("otChart", group(data, "OT"), otChart, c => otChart = c);
-    drawChart("wardChart", group(data, "WARD"), wardChart, c => wardChart = c);
+function populateFilters(){
+[...new Set(rawData.map(r=>r.OT))].forEach(v=>{
+if(v) otFilter.innerHTML+=`<option>${v}</option>`;
+});
+[...new Set(rawData.map(r=>r.WARD))].forEach(v=>{
+if(v) wardFilter.innerHTML+=`<option>${v}</option>`;
+});
 }
 
-function group(data, key) {
-    const g = {};
-    data.forEach(r => {
-        if (r[key]) g[r[key]] = (g[r[key]] || 0) + 1;
-    });
-    return g;
+function updateDashboard(){
+const from=fromDate.value;
+const to=toDate.value;
+
+const filtered=rawData.filter(r=>{
+if(otFilter.value && r.OT!==otFilter.value) return false;
+if(wardFilter.value && r.WARD!==wardFilter.value) return false;
+if(genderFilter.value && r.GENDER!==genderFilter.value) return false;
+if(typeFilter.value && r.TYPE!==typeFilter.value) return false;
+if(from && new Date(r.DATE)<new Date(from)) return false;
+if(to && new Date(r.DATE)>new Date(to)) return false;
+return true;
+});
+
+lastFiltered=filtered;
+
+total.innerText=filtered.length;
+male.innerText=filtered.filter(r=>r.GENDER==="MALE").length;
+female.innerText=filtered.filter(r=>r.GENDER==="FEMALE").length;
+major.innerText=filtered.filter(r=>r.TYPE==="MAJOR").length;
+minor.innerText=filtered.filter(r=>r.TYPE==="MINOR").length;
+
+drawChart("otChart",group(filtered,"OT"),"bar",otChart,c=>otChart=c);
+drawChart("wardChart",group(filtered,"WARD"),"bar",wardChart,c=>wardChart=c);
+drawChart("pieChart",{MAJOR:major.innerText,MINOR:minor.innerText},"pie",pieChart,c=>pieChart=c);
 }
 
-function drawChart(id, data, chart, setChart) {
-    if (chart) chart.destroy();
-    setChart(new Chart(document.getElementById(id), {
-        type: "bar",
-        data: {
-            labels: Object.keys(data),
-            datasets: [{
-                data: Object.values(data),
-                backgroundColor: ["#2563eb","#16a34a","#facc15","#f43f5e","#8b5cf6"]
-            }]
-        },
-        options: {
-            plugins: { legend: { display: false } },
-            responsive: true
-        }
-    }));
+function group(data,key){
+const obj={};
+data.forEach(r=>{
+if(r[key]) obj[r[key]]=(obj[r[key]]||0)+1;
+});
+return obj;
 }
 
-function exportPDF() {
-    const element = document.getElementById("dashboard");
+function drawChart(id,data,type,chart,setChart){
+if(chart) chart.destroy();
+setChart(new Chart(document.getElementById(id),{
+type:type,
+data:{
+labels:Object.keys(data),
+datasets:[{
+data:Object.values(data),
+backgroundColor:["#2563eb","#16a34a","#facc15","#f43f5e","#8b5cf6"]
+}]
+},
+options:{responsive:true}
+}));
+}
 
-    const opt = {
-        margin: [25, 10, 20, 10], // extra top & bottom for header/footer
-        filename: 'Hospital_Dashboard_A4.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            scrollY: 0,
-            windowWidth: element.scrollWidth
-        },
-        jsPDF: {
-            unit: 'mm',
-            format: 'a4',
-            orientation: 'portrait'
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-    };
+/* EXECUTIVE PDF */
+function exportExecutivePDF(){
+let summary=`
+<h2 style="text-align:center;">Executive Summary</h2>
+<p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+<p><strong>Total Surgeries:</strong> ${total.innerText}</p>
+<p><strong>Male:</strong> ${male.innerText}</p>
+<p><strong>Female:</strong> ${female.innerText}</p>
+<p><strong>Major:</strong> ${major.innerText}</p>
+<p><strong>Minor:</strong> ${minor.innerText}</p>
+<hr>
+<h3>OT Wise Summary</h3>
+${generateList(group(lastFiltered,"OT"))}
+<h3>Ward Wise Summary</h3>
+${generateList(group(lastFiltered,"WARD"))}
+`;
 
-    html2pdf()
-        .set(opt)
-        .from(element)
-        .toPdf()
-        .get('pdf')
-        .then(function (pdf) {
+const element=document.createElement("div");
+element.innerHTML=summary + document.getElementById("dashboard").innerHTML;
 
-            const pageCount = pdf.internal.getNumberOfPages();
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
+html2pdf().from(element).save("Executive_Summary.pdf");
+}
 
-            const today = new Date().toLocaleDateString();
-
-            for (let i = 1; i <= pageCount; i++) {
-                pdf.setPage(i);
-
-                /* ===== HEADER ===== */
-                pdf.setFontSize(12);
-                pdf.setTextColor(30, 58, 138); // blue
-                pdf.text(
-                    "SADIQ ABBASI HOSPITAL, BAHAWALPUR",
-                    pageWidth / 2,
-                    12,
-                    { align: "center" }
-                );
-
-                pdf.setDrawColor(200);
-                pdf.line(10, 15, pageWidth - 10, 15);
-
-                /* ===== FOOTER ===== */
-                pdf.setDrawColor(200);
-                pdf.line(10, pageHeight - 15, pageWidth - 10, pageHeight - 15);
-
-                pdf.setFontSize(9);
-                pdf.setTextColor(100);
-                pdf.text(
-                    `Generated on: ${today}`,
-                    10,
-                    pageHeight - 8
-                );
-
-                pdf.text(
-                    `Page ${i} of ${pageCount}`,
-                    pageWidth - 10,
-                    pageHeight - 8,
-                    { align: "right" }
-                );
-            }
-        })
-        .save();
+function generateList(obj){
+let html="<ul>";
+Object.keys(obj).forEach(k=>{
+html+=`<li>${k} : ${obj[k]}</li>`;
+});
+html+="</ul>";
+return html;
 }
 </script>
 
 </body>
 </html>
-
-
