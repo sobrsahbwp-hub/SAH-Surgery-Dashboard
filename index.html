@@ -5,7 +5,6 @@
 <title>Sadiq Abbasi Hospital – Surgery Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -26,7 +25,6 @@ select,input{padding:7px;border-radius:6px;border:1px solid #cbd5e1}
 .buttons{display:flex;justify-content:space-between;padding:20px}
 button{padding:8px 16px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer}
 footer{text-align:center;padding:15px;background:#fff;margin-top:20px;font-size:13px}
-@media print{.filters,.buttons,.clock{display:none}body{background:#fff}}
 </style>
 </head>
 
@@ -40,9 +38,9 @@ footer{text-align:center;padding:15px;background:#fff;margin-top:20px;font-size:
 
 <div class="filters">
 <div class="filter-box"><label>OT</label><select id="otFilter"></select></div>
-<div class="filter-box"><label>WARD</label><select id="wardFilter"></select></div>
+<div class="filter-box"><label>Ward</label><select id="wardFilter"></select></div>
 <div class="filter-box"><label>Gender</label><select id="genderFilter"></select></div>
-<div class="filter-box"><label>Surgery Type</label><select id="typeFilter"></select></div>
+<div class="filter-box"><label>Type</label><select id="typeFilter"></select></div>
 <div class="filter-box"><label>From Date</label><input type="date" id="fromDate"></div>
 <div class="filter-box"><label>To Date</label><input type="date" id="toDate"></div>
 </div>
@@ -51,95 +49,112 @@ footer{text-align:center;padding:15px;background:#fff;margin-top:20px;font-size:
 <div class="kpi"><h4>Total Surgeries</h4><h2 id="total">0</h2></div>
 <div class="kpi"><h4>Total Major</h4><h2 id="major">0</h2></div>
 <div class="kpi"><h4>Total Minor</h4><h2 id="minor">0</h2></div>
-<div class="kpi"><h4>Local Anaesthesia</h4><h2 id="localA">0</h2></div>
-<div class="kpi"><h4>Spinal Anaesthesia</h4><h2 id="spinalA">0</h2></div>
-<div class="kpi"><h4>General Anaesthesia</h4><h2 id="generalA">0</h2></div>
+<div class="kpi"><h4>Local</h4><h2 id="localA">0</h2></div>
+<div class="kpi"><h4>Spinal</h4><h2 id="spinalA">0</h2></div>
+<div class="kpi"><h4>General</h4><h2 id="generalA">0</h2></div>
 </div>
 
 <div class="chart-box"><canvas id="otChart"></canvas></div>
 <div class="chart-box"><canvas id="typeChart"></canvas></div>
 <div class="chart-box"><canvas id="anaesthesiaChart"></canvas></div>
 
-<div class="buttons">
-<button onclick="exportPDF()">Executive Summary Export to PDF</button>
-<button onclick="location.reload()">Refresh</button>
-</div>
-
-<footer>
-Developed By:
-<a href="https://www.linkedin.com/in/smus79" target="_blank">
-Software Engineer MUHAMMAD UMAIR SYED
-</a>
-(IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
-</footer>
-
 <script>
 
-// 🔵 PASTE YOUR GOOGLE SHEET CSV LINK HERE
+// 🔵 YOUR EXACT CSV LINK
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
 let fullData = [];
-let otChart, typeChart, anaesthesiaChart;
+let charts = {};
 
-/* ================= FETCH DATA ================= */
+
+// ================= FETCH DATA =================
 Papa.parse(SHEET_URL, {
 download: true,
 header: true,
-complete: function(results) {
-fullData = results.data.filter(row => row.Date);
+skipEmptyLines: true,
+complete: function(results){
+
+fullData = results.data.map(row => ({
+Date: parseDate(row.Date),
+OT: clean(row.OT),
+Ward: clean(row.Ward),
+Gender: clean(row.Gender),
+Type: clean(row.Type),
+Anaesthesia: clean(row.Anaesthesia)
+})).filter(r => r.Date);
+
 initializeFilters();
 applyFilters();
+
 }
 });
 
-/* ================= FILTER INIT ================= */
+
+// ================= CLEANERS =================
+function clean(value){
+return value ? value.toString().trim().toUpperCase() : "";
+}
+
+function parseDate(value){
+if(!value) return null;
+let d = new Date(value);
+return isNaN(d) ? null : d;
+}
+
+
+// ================= FILTER INIT =================
 function initializeFilters(){
-populateSelect("otFilter", "OT");
-populateSelect("wardFilter", "Ward");
-populateSelect("genderFilter", "Gender");
-populateSelect("typeFilter", "Type");
+populate("otFilter","OT");
+populate("wardFilter","Ward");
+populate("genderFilter","Gender");
+populate("typeFilter","Type");
 
-document.querySelectorAll("select,input").forEach(el =>
-el.addEventListener("change", applyFilters));
+document.querySelectorAll("select,input")
+.forEach(el=>el.addEventListener("change",applyFilters));
 }
 
-function populateSelect(id, column){
+function populate(id,column){
 let select = document.getElementById(id);
-let values = [...new Set(fullData.map(r => r[column]).filter(Boolean))];
+let values = [...new Set(fullData.map(r=>r[column]).filter(Boolean))];
 select.innerHTML = `<option value="ALL">ALL</option>`;
-values.forEach(v => select.innerHTML += `<option>${v}</option>`);
+values.sort().forEach(v=>{
+select.innerHTML += `<option value="${v}">${v}</option>`;
+});
 }
 
-/* ================= FILTER LOGIC ================= */
-function applyFilters(){
-let filtered = fullData.filter(row => {
 
-let date = new Date(row.Date);
+// ================= FILTER LOGIC =================
+function applyFilters(){
+
 let from = document.getElementById("fromDate").value;
 let to = document.getElementById("toDate").value;
+let fromDate = from ? new Date(from) : null;
+let toDate = to ? new Date(to) : null;
 
-if(from && date < new Date(from)) return false;
-if(to && date > new Date(to)) return false;
+let filtered = fullData.filter(row => {
 
-if(matchFilter("otFilter","OT",row) &&
-matchFilter("wardFilter","Ward",row) &&
-matchFilter("genderFilter","Gender",row) &&
-matchFilter("typeFilter","Type",row))
+if(fromDate && row.Date < fromDate) return false;
+if(toDate && row.Date > toDate) return false;
+
+if(!match("otFilter","OT",row)) return false;
+if(!match("wardFilter","Ward",row)) return false;
+if(!match("genderFilter","Gender",row)) return false;
+if(!match("typeFilter","Type",row)) return false;
+
 return true;
-
-return false;
 });
 
 updateKPIs(filtered);
 updateCharts(filtered);
 }
 
-function matchFilter(filterId, column, row){
+function match(filterId,column,row){
 let val = document.getElementById(filterId).value;
-return val === "ALL" || row[column] === val;
+return val==="ALL" || row[column]===val;
 }
 
-/* ================= KPI UPDATE ================= */
+
+// ================= KPI =================
 function updateKPIs(data){
 
 document.getElementById("total").innerText = data.length;
@@ -151,28 +166,25 @@ document.getElementById("generalA").innerText = data.filter(r=>r.Anaesthesia==="
 
 }
 
-/* ================= CHART UPDATE ================= */
+
+// ================= CHARTS =================
 function updateCharts(data){
-
-updateChart("OT", data, otChart, "otChart");
-updateChart("Type", data, typeChart, "typeChart");
-updateChart("Anaesthesia", data, anaesthesiaChart, "anaesthesiaChart");
-
+createChart("OT","otChart",data);
+createChart("Type","typeChart",data);
+createChart("Anaesthesia","anaesthesiaChart",data);
 }
 
-function updateChart(column, data, chartVar, canvasId){
+function createChart(column,canvasId,data){
 
-let counts = {};
-data.forEach(r => counts[r[column]] = (counts[r[column]]||0)+1);
+let counts={};
+data.forEach(r=>counts[r[column]]=(counts[r[column]]||0)+1);
 
-let labels = Object.keys(counts);
-let values = Object.values(counts);
+let labels=Object.keys(counts);
+let values=Object.values(counts);
 
-if(window[canvasId]){
-window[canvasId].destroy();
-}
+if(charts[canvasId]) charts[canvasId].destroy();
 
-window[canvasId] = new Chart(document.getElementById(canvasId),{
+charts[canvasId]=new Chart(document.getElementById(canvasId),{
 type:'bar',
 data:{
 labels:labels,
@@ -192,24 +204,16 @@ plugins:{legend:{display:false}}
 });
 }
 
-/* ================= CLOCK ================= */
+
+// ================= CLOCK =================
 function updateClock(){
-let now = new Date();
 document.getElementById("clock").innerText =
-now.toLocaleString();
+new Date().toLocaleString();
 }
 setInterval(updateClock,1000);
-
-/* ================= PDF EXPORT ================= */
-function exportPDF(){
-html2canvas(document.body).then(canvas=>{
-const { jsPDF } = window.jspdf;
-let pdf = new jsPDF('p','mm','a4');
-pdf.addImage(canvas.toDataURL("image/png"),"PNG",5,5,200,280);
-pdf.save("Surgery_Dashboard.pdf");
-});
-}
+updateClock();
 
 </script>
+
 </body>
 </html>
