@@ -3,135 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data Dashboard)</title>
+<title>SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Dashboard)</title>
 
-<!-- Google Fonts & Chart.js -->
+<!-- Google Fonts & Chart.js & jsPDF -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-    body {
-        font-family: 'Roboto', sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f9f9f9;
-        color: #333;
-    }
-    header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 20px;
-        background-color: #ffffff;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-    header h1 {
-        margin: 0;
-        font-size: 1.4rem;
-        text-align: center;
-        flex: 1;
-    }
-    #clock {
-        font-weight: bold;
-        font-size: 0.9rem;
-    }
-    .filters {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-around;
-        margin: 15px;
-        gap: 15px;
-    }
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-        min-width: 120px;
-    }
-    .filter-group label {
-        font-weight: bold;
-        margin-bottom: 5px;
-        text-align: center;
-    }
-    .filter-group select, .filter-group input {
-        padding: 5px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-    }
-    .kpi-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 20px;
-        gap: 10px;
-    }
-    .kpi-row {
-        display: flex;
-        justify-content: center;
-        gap: 30px;
-        flex-wrap: wrap;
-    }
-    .kpi {
-        background-color: #ffffff;
-        padding: 15px 25px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        text-align: center;
-        min-width: 120px;
-    }
-    .kpi h2 {
-        margin: 5px 0;
-        font-size: 1.5rem;
-        color: #007BFF;
-    }
-    .charts {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 25px;
-        margin: 20px;
-    }
-    canvas {
-        background-color: #fff;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        max-width: 95%;
-    }
-    .footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-color: #ffffff;
-        padding: 10px 20px;
-        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-        flex-wrap: wrap;
-        font-size: 0.85rem;
-    }
-    .footer a {
-        color: #007BFF;
-        text-decoration: none;
-    }
-    button {
-        padding: 8px 15px;
-        border: none;
-        background-color: #007BFF;
-        color: #fff;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-    }
-    button:hover {
-        background-color: #0056b3;
-    }
+body {
+    font-family: 'Roboto', sans-serif;
+    margin:0; padding:0;
+    background:#f9f9f9; color:#333;
+}
+header {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:15px 20px; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    position:sticky; top:0; z-index:100;
+}
+header h1 {
+    margin:0; font-size:1.4rem; text-align:center; flex:1;
+}
+#clock { font-weight:bold; font-size:0.9rem; }
 
-    @media print {
-        header, .filters, .charts, button, .footer { display: none; }
-        body { margin: 0; }
-    }
+.filters {
+    display:flex; flex-wrap:wrap; justify-content:space-around; margin:15px; gap:15px;
+}
+.filter-group { display:flex; flex-direction:column; min-width:120px; }
+.filter-group label { font-weight:bold; margin-bottom:5px; text-align:center; }
+.filter-group select, .filter-group input { padding:5px; border-radius:5px; border:1px solid #ccc; }
+
+.kpi-container { display:flex; flex-direction:column; align-items:center; margin:20px; gap:10px; }
+.kpi-row { display:flex; justify-content:center; gap:30px; flex-wrap:wrap; }
+.kpi { background:#fff; padding:15px 25px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); text-align:center; min-width:120px; }
+.kpi h2 { margin:5px 0; font-size:1.5rem; color:#007BFF; }
+
+.charts-row {
+    display:flex; flex-wrap:wrap; justify-content:center; gap:25px; margin:20px;
+}
+canvas { background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); max-width:45%; }
+
+.footer { display:flex; justify-content:space-between; align-items:center;
+    background:#fff; padding:10px 20px; box-shadow:0 -2px 5px rgba(0,0,0,0.1); flex-wrap:wrap; font-size:0.85rem; 
+}
+.footer a { color:#007BFF; text-decoration:none; }
+
+button { padding:8px 15px; border:none; background:#007BFF; color:#fff; border-radius:5px; cursor:pointer; font-weight:bold; }
+button:hover { background:#0056b3; }
+
+@media print {
+    header, .filters, .charts-row, button, .footer { display:none; }
+    body { margin:0; }
+    canvas { page-break-inside:avoid; }
+}
+
+@media(max-width:768px) {
+    .charts-row canvas { max-width:95%; }
+}
 </style>
 </head>
 <body>
@@ -201,9 +129,7 @@
 </div>
 
 <div class="kpi-container">
-    <div class="kpi-row">
-        <div class="kpi"><h2 id="totalSurgeries">0</h2>Total Surgeries</div>
-    </div>
+    <div class="kpi-row"><div class="kpi"><h2 id="totalSurgeries">0</h2>Total Surgeries</div></div>
     <div class="kpi-row">
         <div class="kpi"><h2 id="maleSurgeries">0</h2>Male Surgeries</div>
         <div class="kpi"><h2 id="femaleSurgeries">0</h2>Female Surgeries</div>
@@ -219,14 +145,16 @@
     </div>
 </div>
 
-<div class="charts">
+<div class="charts-row">
     <canvas id="otChart"></canvas>
     <canvas id="wardChart"></canvas>
+</div>
+<div class="charts-row">
     <canvas id="surgeryTypeChart"></canvas>
     <canvas id="anaesthesiaChart"></canvas>
 </div>
 
-<div style="display:flex; justify-content: space-between; margin: 20px;">
+<div style="display:flex; justify-content: space-between; margin:20px;">
     <button onclick="exportPDF()">Export Executive Summary PDF</button>
     <button onclick="location.reload()">Refresh</button>
 </div>
@@ -241,12 +169,12 @@ let rawData = [];
 
 function updateClock() {
     const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' };
-    const time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit', hour12:true});
+    const options = { weekday:'long', year:'numeric', month:'2-digit', day:'2-digit' };
+    const time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true});
     const date = now.toLocaleDateString([], options);
     document.getElementById('clock').innerText = date + ' ' + time;
 }
-setInterval(updateClock, 1000);
+setInterval(updateClock,1000);
 
 async function fetchData() {
     const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
@@ -257,11 +185,11 @@ async function fetchData() {
 }
 
 function csvToArray(str, delimiter = ",") {
-    const headers = str.slice(0, str.indexOf("\n")).split(delimiter);
+    const headers = str.slice(0,str.indexOf("\n")).split(delimiter);
     const rows = str.slice(str.indexOf("\n")+1).split("\n").filter(r=>r);
-    return rows.map(row => {
-        const values = row.split(delimiter);
-        return headers.reduce((obj, header, i) => (obj[header.trim()] = values[i]?.trim(), obj), {});
+    return rows.map(r => {
+        const values = r.split(delimiter);
+        return headers.reduce((o,h,i)=>(o[h.trim()]=values[i]?.trim(),o),{});
     });
 }
 
@@ -274,126 +202,104 @@ function filterData() {
     const fromDate = document.getElementById('fromDate').value;
     const toDate = document.getElementById('toDate').value;
 
-    return rawData.filter(d => {
+    return rawData.filter(d=>{
         const date = new Date(d['Date']);
-        let age = parseInt(d['AGE']) || 0;
+        let age = parseInt(d['AGE'])||0;
         let ageMatch = true;
-
-        switch(ageGroup) {
-            case "Below 30 Days": ageMatch = age < 1; break;
-            case "1 Month to 1 Year": ageMatch = age >= 1/30 && age <=1; break;
-            case "1 Year to 15 Years": ageMatch = age >=1 && age <=15; break;
-            case "15 to 30 Years": ageMatch = age >=15 && age <=30; break;
-            case "30 to 45 Years": ageMatch = age >=30 && age <=45; break;
-            case "45 to 60 Years": ageMatch = age >=45 && age <=60; break;
-            case "65 Years & above": ageMatch = age >=65; break;
+        switch(ageGroup){
+            case "Below 30 Days": ageMatch = age<1; break;
+            case "1 Month to 1 Year": ageMatch = age>=1/30 && age<=1; break;
+            case "1 Year to 15 Years": ageMatch = age>=1 && age<=15; break;
+            case "15 to 30 Years": ageMatch = age>=15 && age<=30; break;
+            case "30 to 45 Years": ageMatch = age>=30 && age<=45; break;
+            case "45 to 60 Years": ageMatch = age>=45 && age<=60; break;
+            case "65 Years & above": ageMatch = age>=65; break;
         }
-
-        return (ot==="ALL" || d['OT']===ot) &&
-               (ward==="ALL" || d['WARD']===ward) &&
-               (gender==="ALL" || d['GENDER']===gender) &&
-               (type==="ALL" || d['TYPE']===type) &&
+        return (ot==="ALL"||d['OT']===ot) &&
+               (ward==="ALL"||d['WARD']===ward) &&
+               (gender==="ALL"||d['GENDER']===gender) &&
+               (type==="ALL"||d['TYPE']===type) &&
                ageMatch &&
-               (!fromDate || date >= new Date(fromDate)) &&
-               (!toDate || date <= new Date(toDate));
+               (!fromDate||date>=new Date(fromDate)) &&
+               (!toDate||date<=new Date(toDate));
     });
 }
 
-function updateKPIs(data) {
+function updateKPIs(data){
     const total = data.length;
-    const male = data.filter(d => d['GENDER'] === 'MALE').length;
-    const female = data.filter(d => d['GENDER'] === 'FEMALE').length;
-    const major = data.filter(d => d['TYPE'] === 'MAJOR').length;
-    const minor = data.filter(d => d['TYPE'] === 'MINOR').length;
-    const local = data.filter(d => d['ANAESTHESIA'] === 'Local').length;
-    const spinal = data.filter(d => d['ANAESTHESIA'] === 'Spinal').length;
-    const general = data.filter(d => d['ANAESTHESIA'] === 'General').length;
+    const male = data.filter(d=>d['GENDER']==='MALE').length;
+    const female = data.filter(d=>d['GENDER']==='FEMALE').length;
+    const major = data.filter(d=>d['TYPE']==='MAJOR').length;
+    const minor = data.filter(d=>d['TYPE']==='MINOR').length;
+    const local = data.filter(d=>d['ANAESTHESIA']==='Local').length;
+    const spinal = data.filter(d=>d['ANAESTHESIA']==='Spinal').length;
+    const general = data.filter(d=>d['ANAESTHESIA']==='General').length;
 
-    document.getElementById('totalSurgeries').innerText = total;
-    document.getElementById('maleSurgeries').innerText = male;
-    document.getElementById('femaleSurgeries').innerText = female;
-    document.getElementById('majorSurgeries').innerText = major;
-    document.getElementById('minorSurgeries').innerText = minor;
-    document.getElementById('localAnaesthesia').innerText = local;
-    document.getElementById('spinalAnaesthesia').innerText = spinal;
-    document.getElementById('generalAnaesthesia').innerText = general;
+    document.getElementById('totalSurgeries').innerText=total;
+    document.getElementById('maleSurgeries').innerText=male;
+    document.getElementById('femaleSurgeries').innerText=female;
+    document.getElementById('majorSurgeries').innerText=major;
+    document.getElementById('minorSurgeries').innerText=minor;
+    document.getElementById('localAnaesthesia').innerText=local;
+    document.getElementById('spinalAnaesthesia').innerText=spinal;
+    document.getElementById('generalAnaesthesia').innerText=general;
 }
 
 let charts = {};
-function drawCharts(data) {
-    const otCounts = {};
-    const wardCounts = {};
-    const typeCounts = { MAJOR:0, MINOR:0 };
-    const anaesthesiaCounts = { Local:0, Spinal:0, General:0 };
-
-    data.forEach(d => {
+function drawCharts(data){
+    const otCounts = {}, wardCounts={}, typeCounts={MAJOR:0,MINOR:0}, anaesthesiaCounts={Local:0,Spinal:0,General:0};
+    data.forEach(d=>{
         otCounts[d['OT']] = (otCounts[d['OT']]||0)+1;
         wardCounts[d['WARD']] = (wardCounts[d['WARD']]||0)+1;
         if(d['TYPE']) typeCounts[d['TYPE']] = (typeCounts[d['TYPE']]||0)+1;
         if(d['ANAESTHESIA']) anaesthesiaCounts[d['ANAESTHESIA']] = (anaesthesiaCounts[d['ANAESTHESIA']]||0)+1;
     });
 
-    function createChart(ctxId, labels, counts, title) {
+    function createChart(ctxId,labels,counts,title){
         if(charts[ctxId]) charts[ctxId].destroy();
-        const ctx = document.getElementById(ctxId);
-        charts[ctxId] = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: title,
-                    data: counts,
-                    backgroundColor: ['#007BFF','#28A745','#FFC107','#DC3545','#6F42C1','#20C997','#FD7E14']
-                }]
-            },
-            options: {
-                responsive:true,
-                plugins: { legend:{display:false}, title:{display:true, text:title} },
-                scales: { y:{ beginAtZero:true } }
-            }
+        charts[ctxId] = new Chart(document.getElementById(ctxId),{
+            type:'bar',
+            data:{labels:labels,datasets:[{label:title,data:counts,backgroundColor:['#007BFF','#28A745','#FFC107','#DC3545','#6F42C1','#20C997','#FD7E14']}]},
+            options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:title}},scales:{y:{beginAtZero:true}}}
         });
     }
 
-    createChart('otChart', Object.keys(otCounts), Object.values(otCounts), 'OT Wise Surgeries');
-    createChart('wardChart', Object.keys(wardCounts), Object.values(wardCounts), 'Ward Wise Surgeries');
-    createChart('surgeryTypeChart', Object.keys(typeCounts), Object.values(typeCounts), 'Major/Minor Surgeries');
-    createChart('anaesthesiaChart', Object.keys(anaesthesiaCounts), Object.values(anaesthesiaCounts), 'Anaesthesia Type');
+    createChart('otChart',Object.keys(otCounts),Object.values(otCounts),'OT Wise Surgeries');
+    createChart('wardChart',Object.keys(wardCounts),Object.values(wardCounts),'Ward Wise Surgeries');
+    createChart('surgeryTypeChart',Object.keys(typeCounts),Object.values(typeCounts),'Major/Minor Surgeries');
+    createChart('anaesthesiaChart',Object.keys(anaesthesiaCounts),Object.values(anaesthesiaCounts),'Anaesthesia Type');
 }
 
-function updateDashboard() {
+function updateDashboard(){
     const filteredData = filterData();
     updateKPIs(filteredData);
     drawCharts(filteredData);
 }
 
-document.querySelectorAll('select, input').forEach(el => {
-    el.addEventListener('change', updateDashboard);
-});
+document.querySelectorAll('select,input').forEach(el=>el.addEventListener('change',updateDashboard));
 
-function exportPDF() {
+function exportPDF(){
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("SADIQ ABBASI HOSPITAL, BAHAWALPUR", 105, 20, null, null, 'center');
-    doc.setFontSize(12);
-    doc.text("Surgery Data Executive Summary", 105, 30, null, null, 'center');
+    doc.setFontSize(16); doc.text("SADIQ ABBASI HOSPITAL, BAHAWALPUR",105,20,null,null,'center');
+    doc.setFontSize(12); doc.text("Surgery Data Executive Summary",105,30,null,null,'center');
 
-    const total = document.getElementById('totalSurgeries').innerText;
-    const male = document.getElementById('maleSurgeries').innerText;
-    const female = document.getElementById('femaleSurgeries').innerText;
-    const major = document.getElementById('majorSurgeries').innerText;
-    const minor = document.getElementById('minorSurgeries').innerText;
-    const local = document.getElementById('localAnaesthesia').innerText;
-    const spinal = document.getElementById('spinalAnaesthesia').innerText;
-    const general = document.getElementById('generalAnaesthesia').innerText;
+    const total=document.getElementById('totalSurgeries').innerText;
+    const male=document.getElementById('maleSurgeries').innerText;
+    const female=document.getElementById('femaleSurgeries').innerText;
+    const major=document.getElementById('majorSurgeries').innerText;
+    const minor=document.getElementById('minorSurgeries').innerText;
+    const local=document.getElementById('localAnaesthesia').innerText;
+    const spinal=document.getElementById('spinalAnaesthesia').innerText;
+    const general=document.getElementById('generalAnaesthesia').innerText;
 
-    let y = 50;
-    doc.text(`Total Surgeries: ${total}`, 20, y); y+=10;
-    doc.text(`Male Surgeries: ${male} | Female Surgeries: ${female}`, 20, y); y+=10;
-    doc.text(`Major Surgeries: ${major} | Minor Surgeries: ${minor}`, 20, y); y+=10;
-    doc.text(`Local Anaesthesia: ${local} | Spinal Anaesthesia: ${spinal} | General Anaesthesia: ${general}`, 20, y); y+=15;
-    doc.text("Executive Summary Paragraph:", 20, y); y+=10;
-    doc.text("This report summarizes the surgical activities of Sadiq Abbasi Hospital, Bahawalpur, based on the selected filters. It includes total surgeries, gender distribution, type of surgeries, and anaesthesia methods used.", 20, y, {maxWidth:170});
+    let y=50;
+    doc.text(`Total Surgeries: ${total}`,20,y); y+=10;
+    doc.text(`Male Surgeries: ${male} | Female Surgeries: ${female}`,20,y); y+=10;
+    doc.text(`Major Surgeries: ${major} | Minor Surgeries: ${minor}`,20,y); y+=10;
+    doc.text(`Local Anaesthesia: ${local} | Spinal Anaesthesia: ${spinal} | General Anaesthesia: ${general}`,20,y); y+=15;
+    doc.text("Executive Summary Paragraph:",20,y); y+=10;
+    doc.text("This report summarizes the surgical activities of Sadiq Abbasi Hospital, Bahawalpur, based on the selected filters. It includes total surgeries, gender distribution, type of surgeries, and anaesthesia methods used.",20,y,{maxWidth:170});
 
     doc.save("Executive_Summary.pdf");
 }
