@@ -5,101 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SADIQ ABBASI HOSPITAL – Surgery Dashboard</title>
 
-<!-- Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-body{
-    font-family: 'Segoe UI', sans-serif;
-    margin:0;
-    background:#f4f7fb;
-}
-header{
-    text-align:center;
-    padding:20px;
-    background:white;
-    box-shadow:0 2px 8px rgba(0,0,0,0.05);
-    position:relative;
-}
-header h1{
-    margin:0;
-    font-size:20px;
-}
-#clock{
-    position:absolute;
-    right:20px;
-    top:20px;
-    font-size:13px;
-    font-weight:600;
-}
-.container{
-    padding:20px;
-}
-.filters{
-    display:grid;
-    grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
-    gap:15px;
-    margin-bottom:20px;
-}
-.filters label{
-    font-weight:600;
-    font-size:13px;
-}
-.filters select,.filters input{
-    width:100%;
-    padding:6px;
-    margin-top:4px;
-}
-.kpis{
-    display:grid;
-    grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
-    gap:15px;
-    margin-bottom:25px;
-}
-.kpi{
-    background:white;
-    padding:15px;
-    border-radius:8px;
-    text-align:center;
-    box-shadow:0 2px 6px rgba(0,0,0,0.05);
-}
-.kpi h2{
-    margin:5px 0;
-    color:#007bff;
-}
-.charts{
-    display:grid;
-    grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
-    gap:20px;
-}
-.chart-box{
-    background:white;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.05);
-    height:350px;
-}
-.chart-box canvas{
-    height:100% !important;
-}
-.buttons{
-    display:flex;
-    justify-content:space-between;
-    margin-top:25px;
-}
-footer{
-    text-align:center;
-    padding:15px;
-    background:white;
-    margin-top:20px;
-}
-@media(max-width:768px){
-    .chart-box{
-        height:300px;
-    }
-}
+body{font-family:'Segoe UI',sans-serif;margin:0;background:#f4f7fb;}
+header{text-align:center;padding:20px;background:white;box-shadow:0 2px 8px rgba(0,0,0,0.05);position:relative;}
+header h1{margin:0;font-size:20px;}
+#clock{position:absolute;right:20px;top:20px;font-size:13px;font-weight:600;}
+.container{padding:20px;}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:20px;}
+.filters label{font-weight:600;font-size:13px;}
+.filters select,.filters input{width:100%;padding:6px;margin-top:4px;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;margin-bottom:25px;}
+.kpi{background:white;padding:15px;border-radius:8px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+.kpi h2{margin:5px 0;color:#007bff;}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
+.chart-box{background:white;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);height:350px;}
+.chart-box canvas{height:100%!important;}
+.buttons{display:flex;justify-content:space-between;margin-top:25px;}
+footer{text-align:center;padding:15px;background:white;margin-top:20px;}
 </style>
 </head>
 
@@ -112,47 +38,7 @@ footer{
 
 <div class="container">
 
-<!-- FILTERS -->
 <div class="filters">
-<div>
-<label>OT</label>
-<select id="otFilter">
-<option>ALL OTS</option>
-<option>MAIN OT</option>
-<option>GYNAE OT</option>
-</select>
-</div>
-
-<div>
-<label>WARD</label>
-<select id="wardFilter">
-<option>ALL WARDS</option>
-<option>GYNAE</option>
-<option>ORTHO</option>
-<option>SURGERY</option>
-<option>EYE</option>
-</select>
-</div>
-
-<div>
-<label>Gender</label>
-<select id="genderFilter">
-<option>ALL GENDERS</option>
-<option>MALE</option>
-<option>FEMALE</option>
-<option>TRANSGENDER</option>
-</select>
-</div>
-
-<div>
-<label>Surgery Type</label>
-<select id="typeFilter">
-<option>ALL TYPES</option>
-<option>MAJOR</option>
-<option>MINOR</option>
-</select>
-</div>
-
 <div>
 <label>From Date</label>
 <input type="date" id="fromDate">
@@ -164,39 +50,28 @@ footer{
 </div>
 </div>
 
-<!-- KPIs -->
 <div class="kpis">
 <div class="kpi"><div>Total Surgeries</div><h2 id="totalKPI">0</h2></div>
 <div class="kpi"><div>Male</div><h2 id="maleKPI">0</h2></div>
 <div class="kpi"><div>Female</div><h2 id="femaleKPI">0</h2></div>
 <div class="kpi"><div>Major</div><h2 id="majorKPI">0</h2></div>
 <div class="kpi"><div>Minor</div><h2 id="minorKPI">0</h2></div>
-<div class="kpi"><div>Local</div><h2 id="localKPI">0</h2></div>
-<div class="kpi"><div>Spinal</div><h2 id="spinalKPI">0</h2></div>
-<div class="kpi"><div>General</div><h2 id="generalKPI">0</h2></div>
 </div>
 
-<!-- CHARTS -->
 <div class="charts">
 <div class="chart-box"><canvas id="otChart"></canvas></div>
 <div class="chart-box"><canvas id="wardChart"></canvas></div>
-<div class="chart-box"><canvas id="typeChart"></canvas></div>
-<div class="chart-box"><canvas id="anaChart"></canvas></div>
 </div>
 
 <div class="buttons">
-<button onclick="exportPDF()">Executive Summary Export to PDF</button>
+<button onclick="exportPDF()">Export PDF</button>
 <button onclick="location.reload()">Refresh</button>
 </div>
 
 </div>
 
 <footer>
-Developed By: Software Engineer 
-<a href="https://www.linkedin.com/in/smus79" target="_blank">
-MUHAMMAD UMAIR SYED
-</a>
-(IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
+Developed By: MUHAMMAD UMAIR SYED (IT Officer)
 </footer>
 
 <script>
@@ -204,6 +79,7 @@ MUHAMMAD UMAIR SYED
 const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
 let rawData=[];
+let charts={};
 
 // ============================
 // LOAD DATA
@@ -213,93 +89,77 @@ Papa.parse(sheetURL,{
     header:true,
     skipEmptyLines:true,
     complete:function(results){
+
         rawData = results.data.map(row=>{
+
+            // Trim headers safely
+            let cleanRow={};
+            Object.keys(row).forEach(key=>{
+                cleanRow[key.trim().toUpperCase()] = row[key];
+            });
+
             return {
-                ...row,
-                parsedDate: normalizeDate(row["Date"])
+                ...cleanRow,
+                PARSED_DATE: parseMMDDYYYY(cleanRow["DATE"])
             };
         });
+
         applyFilters();
     }
 });
 
 // ============================
-// DATE NORMALIZER (ROBUST)
+// STRICT MM/DD/YYYY PARSER
 // ============================
-function normalizeDate(dateStr){
+function parseMMDDYYYY(dateStr){
 
     if(!dateStr) return null;
 
-    // If already valid ISO
-    if(!isNaN(Date.parse(dateStr))){
-        let d = new Date(dateStr);
-        d.setHours(0,0,0,0);
-        return d;
-    }
+    const parts = dateStr.split("/");
 
-    // Handle DD/MM/YYYY
-    if(dateStr.includes("/")){
-        let parts = dateStr.split("/");
-        if(parts.length === 3){
-            let day = parseInt(parts[0]);
-            let month = parseInt(parts[1]) - 1;
-            let year = parseInt(parts[2]);
-            let d = new Date(year,month,day);
-            d.setHours(0,0,0,0);
-            return d;
-        }
-    }
+    if(parts.length !== 3) return null;
 
-    return null;
+    const month = parseInt(parts[0]) - 1;
+    const day   = parseInt(parts[1]);
+    const year  = parseInt(parts[2]);
+
+    const date = new Date(year, month, day);
+
+    if(isNaN(date)) return null;
+
+    date.setHours(0,0,0,0);
+
+    return date;
 }
 
 // ============================
-// APPLY FILTERS
+// FILTERING LOGIC
 // ============================
 function applyFilters(){
 
-    const ot=document.getElementById("otFilter").value;
-    const ward=document.getElementById("wardFilter").value;
-    const gender=document.getElementById("genderFilter").value;
-    const type=document.getElementById("typeFilter").value;
-    const from=document.getElementById("fromDate").value;
-    const to=document.getElementById("toDate").value;
+    const fromVal = document.getElementById("fromDate").value;
+    const toVal   = document.getElementById("toDate").value;
 
-    let fromDate = from ? new Date(from) : null;
-    let toDate = to ? new Date(to) : null;
+    const fromDate = fromVal ? new Date(fromVal) : null;
+    const toDate   = toVal ? new Date(toVal) : null;
 
     if(fromDate) fromDate.setHours(0,0,0,0);
-    if(toDate) {
-        toDate.setHours(23,59,59,999); // inclusive full day
-    }
+    if(toDate)   toDate.setHours(23,59,59,999);
 
-    let filtered = rawData.filter(r=>{
+    const filtered = rawData.filter(r=>{
 
-        // DATE CHECK
-        let dateMatch = true;
+        if(!r.PARSED_DATE) return false;
 
-        if(fromDate && (!r.parsedDate || r.parsedDate < fromDate)){
-            dateMatch = false;
-        }
+        if(fromDate && r.PARSED_DATE < fromDate) return false;
+        if(toDate   && r.PARSED_DATE > toDate)   return false;
 
-        if(toDate && (!r.parsedDate || r.parsedDate > toDate)){
-            dateMatch = false;
-        }
-
-        return (
-            dateMatch &&
-            (ot==="ALL OTS" || r["OT"]===ot) &&
-            (ward==="ALL WARDS" || r["WARD"]===ward) &&
-            (gender==="ALL GENDERS" || r["GENDER"]===gender) &&
-            (type==="ALL TYPES" || r["TYPE"]===type)
-        );
-
+        return true;
     });
 
     updateDashboard(filtered);
 }
 
-document.querySelectorAll("select,input").forEach(el=>{
+document.querySelectorAll("input").forEach(el=>{
     el.addEventListener("change",applyFilters);
 });
 
@@ -313,18 +173,13 @@ function updateDashboard(data){
     document.getElementById("femaleKPI").innerText=data.filter(r=>r["GENDER"]==="FEMALE").length;
     document.getElementById("majorKPI").innerText=data.filter(r=>r["TYPE"]==="MAJOR").length;
     document.getElementById("minorKPI").innerText=data.filter(r=>r["TYPE"]==="MINOR").length;
-    document.getElementById("localKPI").innerText=data.filter(r=>r["ANAESTHESIA"]==="LOCAL").length;
-    document.getElementById("spinalKPI").innerText=data.filter(r=>r["ANAESTHESIA"]==="SPINAL").length;
-    document.getElementById("generalKPI").innerText=data.filter(r=>r["ANAESTHESIA"]==="GENERAL").length;
 
     createChart("otChart",countBy(data,"OT"));
     createChart("wardChart",countBy(data,"WARD"));
-    createChart("typeChart",countBy(data,"TYPE"));
-    createChart("anaChart",countBy(data,"ANAESTHESIA"));
 }
 
 // ============================
-// GROUPING FUNCTION
+// GROUPING
 // ============================
 function countBy(data,key){
     let obj={};
@@ -336,22 +191,19 @@ function countBy(data,key){
 }
 
 // ============================
-// CHART FUNCTION
+// CHART
 // ============================
 function createChart(id,dataObj){
-    const ctx=document.getElementById(id);
-    if(ctx.chart) ctx.chart.destroy();
 
-    ctx.chart=new Chart(ctx,{
+    if(charts[id]) charts[id].destroy();
+
+    charts[id]=new Chart(document.getElementById(id),{
         type:'bar',
         data:{
             labels:Object.keys(dataObj),
             datasets:[{
                 data:Object.values(dataObj),
-                backgroundColor:[
-                    '#007bff','#28a745','#ffc107','#dc3545',
-                    '#17a2b8','#6f42c1','#fd7e14','#20c997'
-                ]
+                backgroundColor:'#007bff'
             }]
         },
         options:{
@@ -369,8 +221,7 @@ function createChart(id,dataObj){
 function updateClock(){
     const now=new Date();
     document.getElementById("clock").innerHTML=
-        now.toLocaleDateString()+"<br>"+
-        now.toLocaleTimeString();
+        now.toLocaleDateString()+"<br>"+now.toLocaleTimeString();
 }
 setInterval(updateClock,1000);
 updateClock();
@@ -391,4 +242,3 @@ function exportPDF(){
 
 </body>
 </html>
-
