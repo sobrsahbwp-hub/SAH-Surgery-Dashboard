@@ -10,33 +10,33 @@
 <style>
 body{
     margin:0;
-    font-family: 'Segoe UI', sans-serif;
-    background:#f2f7fb;
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#eaf4ff,#f7fbff);
     color:#1a1a1a;
 }
 header{
-    background:#ffffff;
-    padding:20px;
     text-align:center;
+    padding:20px;
     font-size:22px;
     font-weight:700;
-    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+    background:#0d47a1;
+    color:white;
     position:relative;
+    letter-spacing:0.5px;
 }
 #clock{
     position:absolute;
     right:20px;
     top:20px;
     font-size:14px;
-    font-weight:600;
-    color:#0066cc;
+    font-weight:500;
 }
 .section{
-    background:#ffffff;
+    background:white;
     margin:20px;
     padding:20px;
-    border-radius:10px;
-    box-shadow:0 3px 8px rgba(0,0,0,0.05);
+    border-radius:12px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.08);
 }
 .filters{
     display:flex;
@@ -55,22 +55,22 @@ label{
     margin-bottom:4px;
 }
 select,input{
-    padding:6px;
+    padding:7px;
     border-radius:6px;
-    border:1px solid #ccc;
+    border:1px solid #cfd8dc;
 }
 .kpis{
     text-align:center;
 }
 .kpi-big{
-    font-size:40px;
+    font-size:42px;
     font-weight:800;
-    color:#0066cc;
+    color:#0d47a1;
 }
 .kpi-row{
     display:flex;
     justify-content:center;
-    gap:50px;
+    gap:60px;
     margin-top:12px;
     flex-wrap:wrap;
 }
@@ -81,7 +81,7 @@ select,input{
 .chart-row{
     display:flex;
     justify-content:center;
-    gap:50px;
+    gap:60px;
     flex-wrap:wrap;
     margin-top:20px;
 }
@@ -99,23 +99,24 @@ canvas{
     margin:20px;
 }
 button{
-    padding:8px 15px;
+    padding:9px 16px;
     border:none;
     border-radius:6px;
-    background:#0066cc;
+    background:#0d47a1;
     color:white;
     cursor:pointer;
 }
 button:hover{
-    background:#004c99;
+    background:#08306b;
 }
 footer{
     text-align:center;
     padding:12px;
     font-size:13px;
-    background:#ffffff;
-    box-shadow:0 -2px 6px rgba(0,0,0,0.05);
+    background:#0d47a1;
+    color:white;
 }
+footer a{color:#bbdefb;}
 @media(max-width:768px){
     .chart-row{flex-direction:column;align-items:center;}
 }
@@ -162,20 +163,6 @@ DATA of SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)
 <option value="MALE">MALE</option>
 <option value="FEMALE">FEMALE</option>
 <option value="TRANSGENDER">TRANSGENDER</option>
-</select>
-</div>
-
-<div class="filter-box">
-<label>Age Group</label>
-<select id="ageFilter">
-<option value="ALL">ALL</option>
-<option>Below 30 Days</option>
-<option>1 Month to 1 Year</option>
-<option>1 Year to 15 Years</option>
-<option>15 to 30 Years</option>
-<option>30 Years to 45 Years</option>
-<option>45 Years to 60 Years</option>
-<option>65 Years & above</option>
 </select>
 </div>
 
@@ -228,6 +215,7 @@ DATA of SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)
 </div>
 
 <div class="section">
+
 <div class="chart-row">
 <div class="chart-box"><canvas id="otChart"></canvas></div>
 <div class="chart-box"><canvas id="wardChart"></canvas></div>
@@ -237,6 +225,7 @@ DATA of SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)
 <div class="chart-box"><canvas id="typeChart"></canvas></div>
 <div class="chart-box"><canvas id="anaChart"></canvas></div>
 </div>
+
 </div>
 
 <div class="buttons">
@@ -258,7 +247,7 @@ const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9
 let rawData=[];
 let charts={};
 
-function normalize(v){ return v? v.trim().toUpperCase():""; }
+function normalize(v){return v? v.trim().toUpperCase():"";}
 
 fetch(sheetURL)
 .then(r=>r.text())
@@ -271,7 +260,6 @@ fetch(sheetURL)
             ward:normalize(c[2]),
             date:new Date(c[3]),
             gender:normalize(c[6]),
-            age:parseFloat(c[7]),
             anaesthesia:normalize(c[29]),
             type:normalize(c[30])
         };
@@ -298,6 +286,14 @@ function filterData(){
     });
 }
 
+function countBy(data,key){
+    return data.reduce((a,b)=>{
+        if(!b[key]) return a;
+        a[b[key]]=(a[b[key]]||0)+1;
+        return a;
+    },{});
+}
+
 function countMajorMinor(data){
     return {
         MAJOR:data.filter(d=>d.type==="MAJOR").length,
@@ -321,10 +317,17 @@ function buildPie(id,dataObj){
             labels:Object.keys(dataObj),
             datasets:[{
                 data:Object.values(dataObj),
-                backgroundColor:["#0066cc","#00aaff","#33cc99"]
+                backgroundColor:[
+                    "#1565c0","#42a5f5","#26c6da",
+                    "#66bb6a","#ffa726","#ef5350",
+                    "#ab47bc","#8d6e63"
+                ]
             }]
         },
-        options:{plugins:{legend:{position:'bottom'}}}
+        options:{
+            responsive:true,
+            plugins:{legend:{position:'bottom'}}
+        }
     });
 }
 
@@ -345,12 +348,14 @@ function updateDashboard(){
     generalCount.innerText="General: "+anaData.GENERAL;
 
     execText.innerHTML="<b>Executive Summary:</b><br>Total "+data.length+
-    " surgeries performed. Major: "+typeData.MAJOR+
+    " surgeries recorded. Major: "+typeData.MAJOR+
     ", Minor: "+typeData.MINOR+
-    ". Local Anaesthesia: "+anaData.LOCAL+
+    ". Local: "+anaData.LOCAL+
     ", Spinal: "+anaData.SPINAL+
     ", General: "+anaData.GENERAL+".";
 
+    buildPie("otChart",countBy(data,"ot"));
+    buildPie("wardChart",countBy(data,"ward"));
     buildPie("typeChart",typeData);
     buildPie("anaChart",anaData);
 }
