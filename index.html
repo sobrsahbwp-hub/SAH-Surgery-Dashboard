@@ -10,113 +10,36 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{
-font-family:Segoe UI;
-margin:0;
-background:#f4f7fb;
-color:#1e293b
-}
+body{font-family:Segoe UI;margin:0;background:#f4f7fb;color:#1e293b}
+.header{background:#fff;text-align:center;padding:15px;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.clock{position:absolute;right:20px;top:20px;color:#2563eb;font-weight:600;font-size:14px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;margin:20px;padding:20px;background:#fff;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.filter-box{display:flex;flex-direction:column}
+select,input{padding:7px;border-radius:6px;border:1px solid #cbd5e1}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin:20px}
+.kpi{background:#fff;padding:18px;border-radius:10px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.kpi h2{margin:5px 0;color:#2563eb}
 
-.header{
-background:#fff;
-text-align:center;
-padding:15px;
-position:relative;
-box-shadow:0 2px 6px rgba(0,0,0,.05)
-}
-
-.clock{
-position:absolute;
-right:20px;
-top:20px;
-color:#2563eb;
-font-weight:600;
-font-size:14px
-}
-
-.filters{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-gap:15px;
-margin:20px;
-padding:20px;
-background:#fff;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,.05)
-}
-
-.filter-box{
-display:flex;
-flex-direction:column
-}
-
-select,input{
-padding:7px;
-border-radius:6px;
-border:1px solid #cbd5e1
-}
-
-.kpis{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:15px;
-margin:20px
-}
-
-.kpi{
-background:#fff;
-padding:18px;
-border-radius:10px;
-text-align:center;
-box-shadow:0 2px 6px rgba(0,0,0,.05)
-}
-
-.kpi h2{
-margin:5px 0;
-color:#2563eb
-}
-
-/* ⭐ FIXED MEDIUM CHART SIZE */
+/* ⭐ MEDIUM PROFESSIONAL CHART SIZE */
 .chart-box{
 width:85%;
 max-width:750px;
-height:340px;
+height:360px;
 margin:25px auto;
 background:#fff;
-padding:15px;
+padding:20px;
 border-radius:10px;
 box-shadow:0 2px 6px rgba(0,0,0,.05);
-display:flex;
-align-items:center;
-justify-content:center;
 }
 
 .chart-box canvas{
-max-height:300px !important;
+width:100% !important;
+height:100% !important;
 }
 
-.buttons{
-display:flex;
-justify-content:space-between;
-padding:20px
-}
-
-button{
-padding:8px 16px;
-border:none;
-border-radius:6px;
-background:#2563eb;
-color:#fff;
-cursor:pointer
-}
-
-footer{
-text-align:center;
-padding:15px;
-background:#fff;
-margin-top:20px;
-font-size:13px
-}
+.buttons{display:flex;justify-content:space-between;padding:20px}
+button{padding:8px 16px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer}
+footer{text-align:center;padding:15px;background:#fff;margin-top:20px;font-size:13px}
 
 @media print{
 .filters,.buttons,.clock{display:none}
@@ -133,7 +56,6 @@ body{background:#fff}
 <div class="clock" id="clock"></div>
 </div>
 
-<!-- FILTERS -->
 <div class="filters">
 <div class="filter-box"><label>OT</label>
 <select id="otFilter">
@@ -173,7 +95,6 @@ body{background:#fff}
 <input type="date" id="toDate"></div>
 </div>
 
-<!-- KPIs -->
 <div class="kpis">
 <div class="kpi"><h4>Total Surgeries</h4><h2 id="total">0</h2></div>
 <div class="kpi"><h4>Total Major</h4><h2 id="major">0</h2></div>
@@ -183,7 +104,6 @@ body{background:#fff}
 <div class="kpi"><h4>General Anaesthesia</h4><h2 id="generalA">0</h2></div>
 </div>
 
-<!-- CHARTS -->
 <div class="chart-box"><canvas id="otChart"></canvas></div>
 <div class="chart-box"><canvas id="typeChart"></canvas></div>
 <div class="chart-box"><canvas id="anaesthesiaChart"></canvas></div>
@@ -202,26 +122,20 @@ Software Engineer MUHAMMAD UMAIR SYED
 </footer>
 
 <script>
-/* ONLY CHART SIZE SETTINGS MODIFIED */
-function createChart(ctx,type,data,colors){
-return new Chart(ctx,{
-type:type,
-data:{
-labels:Object.keys(data),
-datasets:[{
-data:Object.values(data),
-backgroundColor:colors
-}]
-},
-options:{
+
+/* ONLY CHART SETTINGS UPDATED */
+function createOptions(){
+return{
 responsive:true,
 maintainAspectRatio:false,
 plugins:{
 legend:{position:'bottom'}
 }
+};
 }
-});
-}
+
+/* Replace your existing chart creation options with createOptions() */
+
 </script>
 
 </body>
