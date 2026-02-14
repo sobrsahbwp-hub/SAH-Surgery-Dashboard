@@ -10,113 +10,22 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{
-font-family:Segoe UI;
-margin:0;
-background:#f3f6fb;
-color:#1e293b;
-}
-
-/* HEADER */
-.header{
-background:white;
-padding:15px;
-text-align:center;
-position:relative;
-box-shadow:0 2px 6px rgba(0,0,0,0.05);
-}
-.clock{
-position:absolute;
-right:20px;
-top:20px;
-color:#2563eb;
-font-weight:600;
-font-size:14px;
-}
-
-/* FILTERS */
-.filters{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-gap:15px;
-margin:20px;
-padding:20px;
-background:white;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.05);
-}
-.filter-box{
-display:flex;
-flex-direction:column;
-}
-select,input{
-padding:7px;
-border-radius:6px;
-border:1px solid #cbd5e1;
-}
-
-/* KPI */
-.kpis{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:15px;
-margin:20px;
-}
-.kpi{
-background:white;
-padding:20px;
-border-radius:10px;
-text-align:center;
-box-shadow:0 2px 6px rgba(0,0,0,0.05);
-}
-.kpi h2{
-margin:5px 0;
-color:#2563eb;
-}
-
-/* CHARTS */
-.chart-box{
-width:85%;
-max-width:900px;
-margin:25px auto;
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.05);
-}
-
-/* BUTTONS */
-.buttons{
-display:flex;
-justify-content:space-between;
-padding:20px;
-}
-button{
-padding:8px 16px;
-border:none;
-border-radius:6px;
-background:#2563eb;
-color:white;
-cursor:pointer;
-}
-
-/* FOOTER */
-footer{
-text-align:center;
-padding:15px;
-background:white;
-margin-top:20px;
-font-size:13px;
-}
-
-/* PRINT */
-@media print{
-.filters,.buttons,.clock{display:none;}
-body{background:white;}
-}
+body{font-family:Segoe UI;margin:0;background:#f2f6fb;color:#1e293b}
+.header{background:#fff;text-align:center;padding:15px;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.clock{position:absolute;right:20px;top:20px;color:#2563eb;font-weight:600;font-size:14px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;margin:20px;padding:20px;background:#fff;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.filter-box{display:flex;flex-direction:column}
+select,input{padding:7px;border-radius:6px;border:1px solid #cbd5e1}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin:20px}
+.kpi{background:#fff;padding:20px;border-radius:10px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.kpi h2{margin:5px 0;color:#2563eb}
+.chart-box{width:85%;max-width:900px;margin:25px auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.buttons{display:flex;justify-content:space-between;padding:20px}
+button{padding:8px 16px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer}
+footer{text-align:center;padding:15px;background:#fff;margin-top:20px;font-size:13px}
+@media print{.filters,.buttons,.clock{display:none}body{background:#fff}}
 </style>
 </head>
-
 <body>
 
 <div class="header">
@@ -126,39 +35,24 @@ body{background:white;}
 </div>
 
 <div class="filters">
-
-<div class="filter-box">
-<label>OT</label>
+<div class="filter-box"><label>OT</label>
 <select id="otFilter">
-<option>ALL OTS</option>
-<option>MAIN OT</option>
-<option>GYNAE OT</option>
-</select>
-</div>
+<option>ALL OTS</option><option>MAIN OT</option><option>GYNAE OT</option>
+</select></div>
 
-<div class="filter-box">
-<label>WARD</label>
+<div class="filter-box"><label>WARD</label>
 <select id="wardFilter">
-<option>ALL WARDS</option>
-<option>GYNAE</option>
-<option>ORTHO</option>
-<option>SURGERY</option>
-<option>EYE</option>
-</select>
-</div>
+<option>ALL WARDS</option><option>GYNAE</option><option>ORTHO</option>
+<option>SURGERY</option><option>EYE</option>
+</select></div>
 
-<div class="filter-box">
-<label>Gender</label>
+<div class="filter-box"><label>Gender</label>
 <select id="genderFilter">
-<option>ALL GENDERS</option>
-<option>MALE</option>
-<option>FEMALE</option>
-<option>TRANSGENDER</option>
-</select>
-</div>
+<option>ALL GENDERS</option><option>MALE</option>
+<option>FEMALE</option><option>TRANSGENDER</option>
+</select></div>
 
-<div class="filter-box">
-<label>Age Group</label>
+<div class="filter-box"><label>Age Group</label>
 <select id="ageFilter">
 <option>ALL</option>
 <option>Below 30 Days</option>
@@ -168,28 +62,18 @@ body{background:white;}
 <option>30 Years to 45 Years</option>
 <option>45 Years to 60 Years</option>
 <option>65 Years & above</option>
-</select>
-</div>
+</select></div>
 
-<div class="filter-box">
-<label>Surgery Type</label>
+<div class="filter-box"><label>Surgery Type</label>
 <select id="typeFilter">
-<option>ALL TYPES</option>
-<option>MAJOR</option>
-<option>MINOR</option>
-</select>
-</div>
+<option>ALL TYPES</option><option>MAJOR</option><option>MINOR</option>
+</select></div>
 
-<div class="filter-box">
-<label>From Date</label>
-<input type="date" id="fromDate">
-</div>
+<div class="filter-box"><label>From Date</label>
+<input type="date" id="fromDate"></div>
 
-<div class="filter-box">
-<label>To Date</label>
-<input type="date" id="toDate">
-</div>
-
+<div class="filter-box"><label>To Date</label>
+<input type="date" id="toDate"></div>
 </div>
 
 <div class="kpis">
@@ -200,17 +84,9 @@ body{background:white;}
 <div class="kpi"><h4>Total Minor</h4><h2 id="minor">0</h2></div>
 </div>
 
-<div class="chart-box">
-<canvas id="otChart" height="250"></canvas>
-</div>
-
-<div class="chart-box">
-<canvas id="wardChart" height="250"></canvas>
-</div>
-
-<div class="chart-box">
-<canvas id="typeChart" height="250"></canvas>
-</div>
+<div class="chart-box"><canvas id="otChart" height="250"></canvas></div>
+<div class="chart-box"><canvas id="wardChart" height="250"></canvas></div>
+<div class="chart-box"><canvas id="typeChart" height="250"></canvas></div>
 
 <div class="buttons">
 <button onclick="exportPDF()">Executive Summary Export to PDF</button>
@@ -226,22 +102,34 @@ Software Engineer MUHAMMAD UMAIR SYED
 </footer>
 
 <script>
-
 const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
-let fullData=[];
-let otChart,wardChart,typeChart;
+let fullData=[],otChart,wardChart,typeChart;
+
+/* ROBUST CSV PARSER */
+function parseCSV(text){
+const rows=[];
+let current='',insideQuotes=false,row=[];
+for(let char of text){
+if(char=='"' ) insideQuotes=!insideQuotes;
+else if(char==',' && !insideQuotes){row.push(current);current='';}
+else if(char=='\n' && !insideQuotes){row.push(current);rows.push(row);row=[];current='';}
+else current+=char;
+}
+return rows;
+}
 
 fetch(sheetURL)
-.then(res=>res.text())
-.then(csv=>{
-let rows=csv.trim().split("\n");
-let headers=rows[0].split(",");
+.then(r=>r.text())
+.then(text=>{
+let rows=parseCSV(text.trim());
+let headers=rows[0].map(h=>h.trim().toUpperCase());
 
 rows.slice(1).forEach(r=>{
-let cols=r.split(",");
 let obj={};
-headers.forEach((h,i)=>obj[h.trim().toUpperCase()]=cols[i]);
+headers.forEach((h,i)=>{
+obj[h]=r[i]?r[i].replace(/"/g,'').trim():"";
+});
 fullData.push(obj);
 });
 updateDashboard();
@@ -251,107 +139,98 @@ document.querySelectorAll("select,input").forEach(el=>{
 el.addEventListener("change",updateDashboard);
 });
 
-function getAgeGroup(age){
+function ageGroup(age){
 age=parseFloat(age);
-if(age<0.1) return "Below 30 Days";
-if(age<1) return "1 Month to 1 Year";
-if(age<15) return "1 Year to 15 Years";
-if(age<30) return "15 to 30 Years";
-if(age<45) return "30 Years to 45 Years";
-if(age<60) return "45 Years to 60 Years";
-return "65 Years & above";
+if(age<0.1)return"Below 30 Days";
+if(age<1)return"1 Month to 1 Year";
+if(age<15)return"1 Year to 15 Years";
+if(age<30)return"15 to 30 Years";
+if(age<45)return"30 Years to 45 Years";
+if(age<60)return"45 Years to 60 Years";
+return"65 Years & above";
 }
 
 function updateDashboard(){
 
-let fOT=otFilter.value;
-let fWard=wardFilter.value;
-let fGender=genderFilter.value;
+let fOT=otFilter.value.toUpperCase();
+let fWard=wardFilter.value.toUpperCase();
+let fGender=genderFilter.value.toUpperCase();
 let fAge=ageFilter.value;
-let fType=typeFilter.value;
-let from=fromDate.value;
-let to=toDate.value;
+let fType=typeFilter.value.toUpperCase();
+let from=fromDate.value?new Date(fromDate.value):null;
+let to=toDate.value?new Date(toDate.value):null;
 
 let filtered=fullData.filter(d=>{
 
 let date=new Date(d.DATE);
+if(from && date<from) return false;
+if(to && date>to) return false;
 
-if(from && date<new Date(from)) return false;
-if(to && date>new Date(to)) return false;
-
-if(fOT!="ALL OTS" && d.OT!=fOT) return false;
-if(fWard!="ALL WARDS" && d.WARD!=fWard) return false;
-if(fGender!="ALL GENDERS" && d.GENDER!=fGender) return false;
-if(fType!="ALL TYPES" && d.TYPE!=fType) return false;
-if(fAge!="ALL" && getAgeGroup(d.AGE)!=fAge) return false;
+if(fOT!="ALL OTS" && d.OT.toUpperCase()!=fOT) return false;
+if(fWard!="ALL WARDS" && d.WARD.toUpperCase()!=fWard) return false;
+if(fGender!="ALL GENDERS" && d.GENDER.toUpperCase()!=fGender) return false;
+if(fType!="ALL TYPES" && d.TYPE.toUpperCase()!=fType) return false;
+if(fAge!="ALL" && ageGroup(d.AGE)!=fAge) return false;
 
 return true;
 });
 
-updateKPIs(filtered);
+total.innerText=filtered.length;
+male.innerText=filtered.filter(d=>d.GENDER.toUpperCase()=="MALE").length;
+female.innerText=filtered.filter(d=>d.GENDER.toUpperCase()=="FEMALE").length;
+major.innerText=filtered.filter(d=>d.TYPE.toUpperCase()=="MAJOR").length;
+minor.innerText=filtered.filter(d=>d.TYPE.toUpperCase()=="MINOR").length;
+
 drawCharts(filtered);
 }
 
-function updateKPIs(data){
-total.innerText=data.length;
-male.innerText=data.filter(d=>d.GENDER=="MALE").length;
-female.innerText=data.filter(d=>d.GENDER=="FEMALE").length;
-major.innerText=data.filter(d=>d.TYPE=="MAJOR").length;
-minor.innerText=data.filter(d=>d.TYPE=="MINOR").length;
-}
-
-function groupCount(data,key){
+function group(data,key){
 let obj={};
 data.forEach(d=>{
-obj[d[key]]=(obj[d[key]]||0)+1;
+let k=d[key];
+obj[k]=(obj[k]||0)+1;
 });
 return obj;
 }
 
 function drawCharts(data){
 
-if(otChart) otChart.destroy();
-if(wardChart) wardChart.destroy();
-if(typeChart) typeChart.destroy();
+if(otChart)otChart.destroy();
+if(wardChart)wardChart.destroy();
+if(typeChart)typeChart.destroy();
 
-let otData=groupCount(data,"OT");
-let wardData=groupCount(data,"WARD");
-let typeData=groupCount(data,"TYPE");
+let otData=group(data,"OT");
+let wardData=group(data,"WARD");
+let typeData=group(data,"TYPE");
 
-otChart=new Chart(otChart=document.getElementById("otChart"),{
+otChart=new Chart(document.getElementById("otChart"),{
 type:"bar",
-data:{
-labels:Object.keys(otData),
+data:{labels:Object.keys(otData),
 datasets:[{data:Object.values(otData),
-backgroundColor:["#2563eb","#16a34a","#f59e0b"]}]
-},
-options:{responsive:true,maintainAspectRatio:false}
+backgroundColor:["#2563eb","#16a34a","#f59e0b"]}]},
+options:{responsive:true,plugins:{legend:{display:false}}}
 });
 
 wardChart=new Chart(document.getElementById("wardChart"),{
 type:"bar",
-data:{
-labels:Object.keys(wardData),
+data:{labels:Object.keys(wardData),
 datasets:[{data:Object.values(wardData),
-backgroundColor:["#2563eb","#16a34a","#f59e0b","#ef4444"]}]
-},
-options:{responsive:true,maintainAspectRatio:false}
+backgroundColor:["#2563eb","#16a34a","#f59e0b","#ef4444"]}]},
+options:{responsive:true,plugins:{legend:{display:false}}}
 });
 
 typeChart=new Chart(document.getElementById("typeChart"),{
 type:"pie",
-data:{
-labels:Object.keys(typeData),
+data:{labels:Object.keys(typeData),
 datasets:[{data:Object.values(typeData),
-backgroundColor:["#2563eb","#ef4444"]}]
-},
-options:{responsive:true,maintainAspectRatio:false}
+backgroundColor:["#2563eb","#ef4444"]}]},
+options:{responsive:true}
 });
 }
 
 function exportPDF(){
 html2canvas(document.body).then(canvas=>{
-const { jsPDF } = window.jspdf;
+const { jsPDF }=window.jspdf;
 let pdf=new jsPDF("p","mm","a4");
 pdf.addImage(canvas.toDataURL("image/png"),"PNG",0,0,210,297);
 pdf.save("Executive_Summary.pdf");
@@ -365,7 +244,6 @@ hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true});
 }
 setInterval(updateClock,1000);
 updateClock();
-
 </script>
 </body>
 </html>
