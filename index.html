@@ -3,165 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sadiq Abbasi Hospital - Surgery Dashboard</title>
+<title>SADIQ ABBASI HOSPITAL DASHBOARD</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-:root{
-    --primary:#0b3d91;
-    --accent:#1abc9c;
-    --light:#f4f7fb;
-}
-
 body{
+    font-family: 'Segoe UI', sans-serif;
     margin:0;
-    font-family:Segoe UI, sans-serif;
-    background:linear-gradient(to right,#f4f7fb,#ffffff);
-    color:#1a1a1a;
+    background:#f4f7fb;
+    color:#222;
 }
-
-.container{
-    width:95%;
-    margin:auto;
-}
-
-.clock{
+.header{
     text-align:center;
-    font-weight:600;
     padding:10px;
-    color:var(--primary);
-    font-size:18px;
+    font-size:22px;
+    font-weight:bold;
 }
-
-h1{
-    text-align:center;
-    color:var(--primary);
+.clock{
+    position:absolute;
+    left:15px;
+    top:10px;
+    font-size:14px;
+    font-weight:600;
+}
+.container{
+    padding:15px;
+}
+.filters{
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+    gap:15px;
     margin-bottom:20px;
 }
-
-/* FILTERS */
-.filters{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:15px;
-    margin-bottom:25px;
-}
-
 .filter-group{
     display:flex;
     flex-direction:column;
 }
-
 select,input{
-    padding:8px;
-    border-radius:8px;
+    padding:6px;
+    border-radius:5px;
     border:1px solid #ccc;
-    min-width:160px;
 }
-
-/* KPI CARDS */
-.kpi-container{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:15px;
+.kpi-main{
+    text-align:center;
+    font-size:26px;
+    font-weight:bold;
+    margin:10px 0;
 }
-
-.kpi-large{
-    background:white;
-    padding:20px 40px;
-    border-radius:12px;
-    box-shadow:0 4px 15px rgba(0,0,0,0.1);
-    font-size:30px;
-    font-weight:700;
-    color:var(--primary);
-    animation:fadeIn 1s ease;
-}
-
 .kpi-row{
     display:flex;
     justify-content:center;
-    gap:20px;
     flex-wrap:wrap;
+    gap:20px;
+    margin-bottom:10px;
 }
-
-.kpi-card{
+.kpi{
     background:white;
-    padding:15px 25px;
-    border-radius:12px;
-    box-shadow:0 4px 15px rgba(0,0,0,0.08);
-    min-width:150px;
-    text-align:center;
-    transition:0.3s;
+    padding:10px 20px;
+    border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+    font-weight:600;
 }
-
-.kpi-card:hover{
-    transform:translateY(-5px);
-}
-
-.kpi-value{
-    font-size:22px;
-    font-weight:bold;
-    color:var(--primary);
-}
-
-/* CHARTS */
 .chart-row{
     display:flex;
     justify-content:center;
-    gap:40px;
     flex-wrap:wrap;
-    margin-top:30px;
+    gap:40px;
+    margin-top:20px;
 }
-
 canvas{
-    width:320px !important;
-    height:320px !important;
+    max-width:300px;
+    max-height:300px;
 }
-
-/* BUTTONS */
-.bottom-buttons{
+.footer{
+    text-align:center;
+    padding:10px;
+    margin-top:20px;
+    font-size:14px;
+}
+.buttons{
     display:flex;
     justify-content:space-between;
-    margin:30px 10px;
+    margin-top:20px;
 }
-
 button{
-    padding:10px 20px;
-    background:var(--primary);
-    color:white;
+    padding:8px 15px;
     border:none;
-    border-radius:8px;
+    border-radius:6px;
+    background:#007bff;
+    color:white;
     cursor:pointer;
-    transition:0.3s;
 }
 button:hover{
-    background:#062a63;
+    background:#0056b3;
 }
-
-footer{
-    text-align:center;
-    padding:15px;
-    background:#e9eef7;
-}
-
-@keyframes fadeIn{
-    from{opacity:0; transform:translateY(10px);}
-    to{opacity:1; transform:translateY(0);}
-}
-
-@media(max-width:768px){
-    canvas{
-        width:260px !important;
-        height:260px !important;
-    }
-}
-
 @media print{
-    .filters,.chart-row,.bottom-buttons{
+    body{
+        background:white;
+    }
+    button, canvas{
         display:none;
     }
 }
@@ -169,19 +111,29 @@ footer{
 </head>
 
 <body>
-<div class="container">
 
 <div class="clock" id="clock"></div>
-<h1>SADIQ ABBASI HOSPITAL, BAHAWALPUR (Surgery Data)</h1>
 
-<!-- FILTERS -->
+<div class="header">
+SADIQ ABBASI HOSPITAL, BAHAWALPUR<br>
+(Surgery Data - DATA Sheet)
+</div>
+
+<div class="container">
+
 <div class="filters">
+
+<div class="filter-group">
+<label>OT</label>
 <select id="otFilter">
 <option>ALL OTS</option>
 <option>MAIN OT</option>
 <option>GYNAE OT</option>
 </select>
+</div>
 
+<div class="filter-group">
+<label>WARD</label>
 <select id="wardFilter">
 <option>ALL WARDS</option>
 <option>GYNAE</option>
@@ -189,50 +141,71 @@ footer{
 <option>SURGERY</option>
 <option>EYE</option>
 </select>
+</div>
 
+<div class="filter-group">
+<label>Gender</label>
 <select id="genderFilter">
 <option>ALL GENDERS</option>
 <option>MALE</option>
 <option>FEMALE</option>
 <option>TRANSGENDER</option>
 </select>
+</div>
 
+<div class="filter-group">
+<label>Age Group</label>
+<select id="ageFilter">
+<option>ALL AGES</option>
+<option>Below 30 Days</option>
+<option>1 Month to 1 Year</option>
+<option>1 Year to 15 Years</option>
+<option>15 to 30 Years</option>
+<option>30 Years to 45 Years</option>
+<option>45 Years to 60 Years</option>
+<option>65 Years & above</option>
+</select>
+</div>
+
+<div class="filter-group">
+<label>Surgery Type</label>
 <select id="typeFilter">
 <option>ALL TYPES</option>
 <option>MAJOR</option>
 <option>MINOR</option>
 </select>
+</div>
 
+<div class="filter-group">
+<label>From Date</label>
 <input type="date" id="fromDate">
+</div>
+
+<div class="filter-group">
+<label>To Date</label>
 <input type="date" id="toDate">
 </div>
 
-<!-- KPI SECTION -->
-<div class="kpi-container">
+</div>
 
-<div class="kpi-large">
-TOTAL SURGERIES: <span id="totalCount">0</span>
+<div class="kpi-main">TOTAL SURGERIES: <span id="totalKPI">0</span></div>
+
+<div class="kpi-row">
+<div class="kpi">Male: <span id="maleKPI">0</span></div>
+<div class="kpi">Female: <span id="femaleKPI">0</span></div>
 </div>
 
 <div class="kpi-row">
-<div class="kpi-card">Male<br><span class="kpi-value" id="maleCount">0</span></div>
-<div class="kpi-card">Female<br><span class="kpi-value" id="femaleCount">0</span></div>
+<div class="kpi">Major: <span id="majorKPI">0</span></div>
+<div class="kpi">Minor: <span id="minorKPI">0</span></div>
 </div>
 
 <div class="kpi-row">
-<div class="kpi-card">Major<br><span class="kpi-value" id="majorCount">0</span></div>
-<div class="kpi-card">Minor<br><span class="kpi-value" id="minorCount">0</span></div>
+<div class="kpi">Local: <span id="localKPI">0</span></div>
+<div class="kpi">Spinal: <span id="spinalKPI">0</span></div>
+<div class="kpi">General: <span id="generalKPI">0</span></div>
 </div>
 
-<div class="kpi-row">
-<div class="kpi-card">Local<br><span class="kpi-value" id="localCount">0</span></div>
-<div class="kpi-card">Spinal<br><span class="kpi-value" id="spinalCount">0</span></div>
-<div class="kpi-card">General<br><span class="kpi-value" id="generalCount">0</span></div>
-</div>
-
-</div>
-
-<!-- CHARTS -->
 <div class="chart-row">
 <canvas id="otChart"></canvas>
 <canvas id="wardChart"></canvas>
@@ -240,105 +213,140 @@ TOTAL SURGERIES: <span id="totalCount">0</span>
 
 <div class="chart-row">
 <canvas id="typeChart"></canvas>
-<canvas id="anaesthesiaChart"></canvas>
+<canvas id="anaChart"></canvas>
 </div>
 
-<div class="bottom-buttons">
-<button onclick="exportPDF()">Export Executive Summary PDF</button>
+<div class="buttons">
+<button onclick="exportPDF()">Export Executive Summary</button>
 <button onclick="location.reload()">Refresh</button>
 </div>
 
 </div>
 
-<footer>
-Developed By: <a href="https://www.linkedin.com/in/smus79" target="_blank">
-Software Engineer MUHAMMAD UMAIR SYED (IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
+<div class="footer">
+Developed By:
+<a href="https://www.linkedin.com/in/smus79" target="_blank">
+Software Engineer MUHAMMAD UMAIR SYED
 </a>
-</footer>
+(IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
+</div>
 
 <script>
-const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
-let data=[], charts={};
+const csvUrl="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
-fetch(sheetURL)
+let rawData=[];
+let otChart,wardChart,typeChart,anaChart;
+
+function updateClock(){
+    const now=new Date();
+    document.getElementById("clock").innerText=
+    now.toLocaleString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'numeric',minute:'numeric',second:'numeric',hour12:true});
+}
+setInterval(updateClock,1000);
+
+fetch(csvUrl)
 .then(res=>res.text())
-.then(csv=>{
-    const rows=csv.split("\n").slice(1);
-    data=rows.map(r=>r.split(","));
-    updateDashboard();
+.then(data=>{
+    const rows=data.split("\n").slice(1);
+    rawData=rows.map(r=>r.split(","));
+    applyFilters();
 });
 
-document.querySelectorAll("select,input").forEach(el=>{
-    el.addEventListener("change",updateDashboard);
-});
+document.querySelectorAll("select,input").forEach(el=>el.addEventListener("change",applyFilters));
 
-function animateValue(id,end){
-    let start=0;
-    let duration=600;
-    let range=end-start;
-    let stepTime=Math.abs(Math.floor(duration/range));
-    let obj=document.getElementById(id);
-    let timer=setInterval(()=>{
-        start++;
-        obj.textContent=start;
-        if(start>=end) clearInterval(timer);
-    },stepTime);
+function applyFilters(){
+    let filtered=rawData;
+
+    const ot=document.getElementById("otFilter").value;
+    const ward=document.getElementById("wardFilter").value;
+    const gender=document.getElementById("genderFilter").value;
+    const type=document.getElementById("typeFilter").value;
+    const from=document.getElementById("fromDate").value;
+    const to=document.getElementById("toDate").value;
+
+    filtered=filtered.filter(r=>{
+        const date=new Date(r[3]);
+        return (ot==="ALL OTS"||r[1]===ot)
+        &&(ward==="ALL WARDS"||r[2]===ward)
+        &&(gender==="ALL GENDERS"||r[6]===gender)
+        &&(type==="ALL TYPES"||r[30]===type)
+        &&(!from||date>=new Date(from))
+        &&(!to||date<=new Date(to));
+    });
+
+    updateKPIs(filtered);
+    drawCharts(filtered);
 }
 
-function updateDashboard(){
-let filtered=data;
-
-let total=filtered.length;
-let male=filtered.filter(r=>r[6]=="MALE").length;
-let female=filtered.filter(r=>r[6]=="FEMALE").length;
-let major=filtered.filter(r=>r[30]=="MAJOR").length;
-let minor=filtered.filter(r=>r[30]=="MINOR").length;
-let local=filtered.filter(r=>r[29]=="LOCAL").length;
-let spinal=filtered.filter(r=>r[29]=="SPINAL").length;
-let general=filtered.filter(r=>r[29]=="GENERAL").length;
-
-animateValue("totalCount",total);
-animateValue("maleCount",male);
-animateValue("femaleCount",female);
-animateValue("majorCount",major);
-animateValue("minorCount",minor);
-animateValue("localCount",local);
-animateValue("spinalCount",spinal);
-animateValue("generalCount",general);
-
-drawChart("typeChart",{Major:major,Minor:minor},"Major/Minor");
-drawChart("anaesthesiaChart",{Local:local,Spinal:spinal,General:general},"Anaesthesia Type");
+function updateKPIs(data){
+    document.getElementById("totalKPI").innerText=data.length;
+    document.getElementById("maleKPI").innerText=data.filter(r=>r[6]==="MALE").length;
+    document.getElementById("femaleKPI").innerText=data.filter(r=>r[6]==="FEMALE").length;
+    document.getElementById("majorKPI").innerText=data.filter(r=>r[30]==="MAJOR").length;
+    document.getElementById("minorKPI").innerText=data.filter(r=>r[30]==="MINOR").length;
+    document.getElementById("localKPI").innerText=data.filter(r=>r[29]==="LOCAL").length;
+    document.getElementById("spinalKPI").innerText=data.filter(r=>r[29]==="SPINAL").length;
+    document.getElementById("generalKPI").innerText=data.filter(r=>r[29]==="GENERAL").length;
 }
 
-function drawChart(id,data,label){
-if(charts[id]) charts[id].destroy();
-charts[id]=new Chart(document.getElementById(id),{
-type:'doughnut',
-data:{
-labels:Object.keys(data),
-datasets:[{
-data:Object.values(data),
-backgroundColor:['#0b3d91','#1abc9c','#e74c3c']
-}]
-},
-options:{
-plugins:{title:{display:true,text:label}},
-animation:{animateScale:true}
+function drawCharts(data){
+    const otCount=countBy(data,1);
+    const wardCount=countBy(data,2);
+    const typeCount=countBy(data,30);
+    const anaCount=countBy(data,29);
+
+    createPie("otChart",otCount);
+    createPie("wardChart",wardCount);
+    createPie("typeChart",typeCount);
+    createPie("anaChart",anaCount);
 }
-});
+
+function countBy(data,index){
+    const result={};
+    data.forEach(r=>{
+        const key=r[index]||"Unknown";
+        result[key]=(result[key]||0)+1;
+    });
+    return result;
+}
+
+function createPie(id,dataObj){
+    const ctx=document.getElementById(id);
+    if(window[id]) window[id].destroy();
+    window[id]=new Chart(ctx,{
+        type:'pie',
+        data:{
+            labels:Object.keys(dataObj),
+            datasets:[{
+                data:Object.values(dataObj),
+                backgroundColor:['#007bff','#28a745','#ffc107','#dc3545','#17a2b8','#6f42c1']
+            }]
+        },
+        options:{responsive:true,plugins:{legend:{position:'bottom'}}}
+    });
 }
 
 function exportPDF(){
-html2pdf().from(document.querySelector(".kpi-container")).save("Executive_Summary.pdf");
-}
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF();
+    doc.setFontSize(16);
+    doc.text("SADIQ ABBASI HOSPITAL, BAHAWALPUR",20,20);
+    doc.setFontSize(12);
+    doc.text("Executive Summary (Surgery Data)",20,30);
 
-function updateClock(){
-let now=new Date();
-document.getElementById("clock").innerText=
-now.toLocaleDateString()+" | "+now.toLocaleTimeString();
+    let summary=`Total Surgeries: ${totalKPI.innerText}
+Male: ${maleKPI.innerText}
+Female: ${femaleKPI.innerText}
+Major: ${majorKPI.innerText}
+Minor: ${minorKPI.innerText}
+Local: ${localKPI.innerText}
+Spinal: ${spinalKPI.innerText}
+General: ${generalKPI.innerText}`;
+
+    doc.text(summary,20,40);
+    doc.text("Generated on: "+new Date().toLocaleString(),20,100);
+    doc.save("Executive_Summary.pdf");
 }
-setInterval(updateClock,1000);
-updateClock();
 </script>
 
 </body>
