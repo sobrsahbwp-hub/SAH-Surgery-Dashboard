@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,30 +10,33 @@
 
 <style>
 body{
-    font-family: 'Segoe UI', sans-serif;
+    font-family:Segoe UI;
     margin:0;
-    background:#f4f7fb;
-    color:#222;
+    background:#f2f6fb;
 }
 .header{
     text-align:center;
-    padding:10px;
-    font-size:22px;
+    font-size:24px;
     font-weight:bold;
+    padding-top:15px;
+}
+.subheader{
+    text-align:center;
+    font-size:16px;
+    margin-bottom:15px;
 }
 .clock{
     position:absolute;
     left:15px;
     top:10px;
+    font-weight:bold;
     font-size:14px;
-    font-weight:600;
 }
-.container{
-    padding:15px;
-}
+.container{padding:20px;}
+
 .filters{
     display:grid;
-    grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
     gap:15px;
     margin-bottom:20px;
 }
@@ -41,16 +44,22 @@ body{
     display:flex;
     flex-direction:column;
 }
+label{
+    font-size:13px;
+    margin-bottom:4px;
+    font-weight:600;
+}
 select,input{
     padding:6px;
-    border-radius:5px;
+    border-radius:6px;
     border:1px solid #ccc;
 }
+
 .kpi-main{
     text-align:center;
-    font-size:26px;
+    font-size:28px;
     font-weight:bold;
-    margin:10px 0;
+    margin-bottom:10px;
 }
 .kpi-row{
     display:flex;
@@ -61,51 +70,48 @@ select,input{
 }
 .kpi{
     background:white;
-    padding:10px 20px;
-    border-radius:8px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.1);
-    font-weight:600;
+    padding:10px 18px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    font-weight:bold;
 }
+
 .chart-row{
     display:flex;
     justify-content:center;
     flex-wrap:wrap;
     gap:40px;
-    margin-top:20px;
+    margin-top:25px;
 }
 canvas{
-    max-width:300px;
-    max-height:300px;
+    max-width:320px;
+    max-height:320px;
 }
-.footer{
-    text-align:center;
-    padding:10px;
-    margin-top:20px;
-    font-size:14px;
-}
+
 .buttons{
     display:flex;
     justify-content:space-between;
-    margin-top:20px;
+    margin-top:25px;
 }
 button{
     padding:8px 15px;
     border:none;
     border-radius:6px;
-    background:#007bff;
+    background:#0066cc;
     color:white;
     cursor:pointer;
 }
-button:hover{
-    background:#0056b3;
+button:hover{background:#004c99;}
+
+.footer{
+    text-align:center;
+    padding:15px;
+    font-size:14px;
+    margin-top:20px;
 }
+
 @media print{
-    body{
-        background:white;
-    }
-    button, canvas{
-        display:none;
-    }
+    canvas,button{display:none;}
 }
 </style>
 </head>
@@ -115,9 +121,9 @@ button:hover{
 <div class="clock" id="clock"></div>
 
 <div class="header">
-SADIQ ABBASI HOSPITAL, BAHAWALPUR<br>
-(Surgery Data - DATA Sheet)
+SADIQ ABBASI HOSPITAL, BAHAWALPUR
 </div>
+<div class="subheader">(DATA Sheet – Surgery Data)</div>
 
 <div class="container">
 
@@ -188,7 +194,9 @@ SADIQ ABBASI HOSPITAL, BAHAWALPUR<br>
 
 </div>
 
-<div class="kpi-main">TOTAL SURGERIES: <span id="totalKPI">0</span></div>
+<div class="kpi-main">
+TOTAL SURGERIES: <span id="totalKPI">0</span>
+</div>
 
 <div class="kpi-row">
 <div class="kpi">Male: <span id="maleKPI">0</span></div>
@@ -235,94 +243,114 @@ Software Engineer MUHAMMAD UMAIR SYED
 const csvUrl="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
 let rawData=[];
-let otChart,wardChart,typeChart,anaChart;
+let charts={};
 
 function updateClock(){
-    const now=new Date();
     document.getElementById("clock").innerText=
-    now.toLocaleString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'numeric',minute:'numeric',second:'numeric',hour12:true});
+    new Date().toLocaleString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'numeric',minute:'numeric',second:'numeric',hour12:true});
 }
 setInterval(updateClock,1000);
 
 fetch(csvUrl)
 .then(res=>res.text())
-.then(data=>{
-    const rows=data.split("\n").slice(1);
+.then(text=>{
+    const rows=text.split("\n").slice(1);
     rawData=rows.map(r=>r.split(","));
     applyFilters();
 });
 
-document.querySelectorAll("select,input").forEach(el=>el.addEventListener("change",applyFilters));
+document.querySelectorAll("select,input").forEach(el=>{
+    el.addEventListener("change",applyFilters);
+});
 
 function applyFilters(){
-    let filtered=rawData;
+    let data=rawData;
 
-    const ot=document.getElementById("otFilter").value;
-    const ward=document.getElementById("wardFilter").value;
-    const gender=document.getElementById("genderFilter").value;
-    const type=document.getElementById("typeFilter").value;
-    const from=document.getElementById("fromDate").value;
-    const to=document.getElementById("toDate").value;
+    const ot=otFilter.value;
+    const ward=wardFilter.value;
+    const gender=genderFilter.value;
+    const type=typeFilter.value;
+    const ageGroup=ageFilter.value;
+    const from=fromDate.value;
+    const to=toDate.value;
 
-    filtered=filtered.filter(r=>{
+    data=data.filter(r=>{
         const date=new Date(r[3]);
+        const age=parseFloat(r[7]);
+
         return (ot==="ALL OTS"||r[1]===ot)
         &&(ward==="ALL WARDS"||r[2]===ward)
         &&(gender==="ALL GENDERS"||r[6]===gender)
         &&(type==="ALL TYPES"||r[30]===type)
+        &&filterAge(age,ageGroup)
         &&(!from||date>=new Date(from))
         &&(!to||date<=new Date(to));
     });
 
-    updateKPIs(filtered);
-    drawCharts(filtered);
+    updateKPIs(data);
+    drawCharts(data);
+}
+
+function filterAge(age,group){
+    if(group==="ALL AGES") return true;
+    if(group==="Below 30 Days") return age<1/12;
+    if(group==="1 Month to 1 Year") return age>=1/12&&age<=1;
+    if(group==="1 Year to 15 Years") return age>1&&age<=15;
+    if(group==="15 to 30 Years") return age>15&&age<=30;
+    if(group==="30 Years to 45 Years") return age>30&&age<=45;
+    if(group==="45 Years to 60 Years") return age>45&&age<=60;
+    if(group==="65 Years & above") return age>=65;
+    return true;
 }
 
 function updateKPIs(data){
-    document.getElementById("totalKPI").innerText=data.length;
-    document.getElementById("maleKPI").innerText=data.filter(r=>r[6]==="MALE").length;
-    document.getElementById("femaleKPI").innerText=data.filter(r=>r[6]==="FEMALE").length;
-    document.getElementById("majorKPI").innerText=data.filter(r=>r[30]==="MAJOR").length;
-    document.getElementById("minorKPI").innerText=data.filter(r=>r[30]==="MINOR").length;
-    document.getElementById("localKPI").innerText=data.filter(r=>r[29]==="LOCAL").length;
-    document.getElementById("spinalKPI").innerText=data.filter(r=>r[29]==="SPINAL").length;
-    document.getElementById("generalKPI").innerText=data.filter(r=>r[29]==="GENERAL").length;
+    totalKPI.innerText=data.length;
+    maleKPI.innerText=data.filter(r=>r[6]==="MALE").length;
+    femaleKPI.innerText=data.filter(r=>r[6]==="FEMALE").length;
+    majorKPI.innerText=data.filter(r=>r[30]==="MAJOR").length;
+    minorKPI.innerText=data.filter(r=>r[30]==="MINOR").length;
+    localKPI.innerText=data.filter(r=>r[29]==="LOCAL").length;
+    spinalKPI.innerText=data.filter(r=>r[29]==="SPINAL").length;
+    generalKPI.innerText=data.filter(r=>r[29]==="GENERAL").length;
 }
 
 function drawCharts(data){
-    const otCount=countBy(data,1);
-    const wardCount=countBy(data,2);
-    const typeCount=countBy(data,30);
-    const anaCount=countBy(data,29);
-
-    createPie("otChart",otCount);
-    createPie("wardChart",wardCount);
-    createPie("typeChart",typeCount);
-    createPie("anaChart",anaCount);
+    createChart("otChart",countBy(data,1),"OT Wise");
+    createChart("wardChart",countBy(data,2),"Ward Wise");
+    createChart("typeChart",countBy(data,30),"Major / Minor");
+    createChart("anaChart",countBy(data,29),"Anaesthesia Type");
 }
 
 function countBy(data,index){
-    const result={};
+    const obj={};
     data.forEach(r=>{
         const key=r[index]||"Unknown";
-        result[key]=(result[key]||0)+1;
+        obj[key]=(obj[key]||0)+1;
     });
-    return result;
+    return obj;
 }
 
-function createPie(id,dataObj){
-    const ctx=document.getElementById(id);
-    if(window[id]) window[id].destroy();
-    window[id]=new Chart(ctx,{
-        type:'pie',
+function createChart(id,data,title){
+    if(charts[id]) charts[id].destroy();
+
+    charts[id]=new Chart(document.getElementById(id),{
+        type:"pie",
         data:{
-            labels:Object.keys(dataObj),
+            labels:Object.keys(data),
             datasets:[{
-                data:Object.values(dataObj),
-                backgroundColor:['#007bff','#28a745','#ffc107','#dc3545','#17a2b8','#6f42c1']
+                data:Object.values(data),
+                backgroundColor:[
+                "#007bff","#28a745","#ffc107",
+                "#dc3545","#17a2b8","#6f42c1","#fd7e14"]
             }]
         },
-        options:{responsive:true,plugins:{legend:{position:'bottom'}}}
+        options:{
+            responsive:true,
+            plugins:{
+                legend:{position:"bottom"},
+                title:{display:true,text:title}
+            }
+        }
     });
 }
 
@@ -332,19 +360,19 @@ function exportPDF(){
     doc.setFontSize(16);
     doc.text("SADIQ ABBASI HOSPITAL, BAHAWALPUR",20,20);
     doc.setFontSize(12);
-    doc.text("Executive Summary (Surgery Data)",20,30);
+    doc.text("Executive Summary - Surgery Data",20,30);
 
-    let summary=`Total Surgeries: ${totalKPI.innerText}
-Male: ${maleKPI.innerText}
-Female: ${femaleKPI.innerText}
-Major: ${majorKPI.innerText}
-Minor: ${minorKPI.innerText}
-Local: ${localKPI.innerText}
-Spinal: ${spinalKPI.innerText}
-General: ${generalKPI.innerText}`;
+    let y=45;
+    doc.text("Total Surgeries: "+totalKPI.innerText,20,y); y+=8;
+    doc.text("Male: "+maleKPI.innerText,20,y); y+=8;
+    doc.text("Female: "+femaleKPI.innerText,20,y); y+=8;
+    doc.text("Major: "+majorKPI.innerText,20,y); y+=8;
+    doc.text("Minor: "+minorKPI.innerText,20,y); y+=8;
+    doc.text("Local: "+localKPI.innerText,20,y); y+=8;
+    doc.text("Spinal: "+spinalKPI.innerText,20,y); y+=8;
+    doc.text("General: "+generalKPI.innerText,20,y);
 
-    doc.text(summary,20,40);
-    doc.text("Generated on: "+new Date().toLocaleString(),20,100);
+    doc.text("Generated on: "+new Date().toLocaleString(),20,270);
     doc.save("Executive_Summary.pdf");
 }
 </script>
