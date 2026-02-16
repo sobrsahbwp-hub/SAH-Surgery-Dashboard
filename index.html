@@ -2,122 +2,30 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Sadiq Abbasi Hospital Dashboard</title>
+<title>Sadiq Abbasi Hospital Surgery Dashboard</title>
 
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
 <style>
-body{
-font-family:Segoe UI, sans-serif;
-margin:0;
-background:#f4f7fb;
-color:#222;
-}
-
-header{
-text-align:center;
-padding:10px;
-position:relative;
-}
-
-#clock{
-position:absolute;
-left:15px;
-top:10px;
-font-size:14px;
-font-weight:600;
-color:#004a99;
-}
-
-h1{
-margin:20px 0 10px 0;
-color:#003366;
-}
-
-.filters{
-display:grid;
-grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
-gap:15px;
-padding:20px;
-}
-
-.filter-group{
-display:flex;
-flex-direction:column;
-}
-
-label{
-font-weight:600;
-margin-bottom:5px;
-font-size:14px;
-}
-
-select,input{
-padding:6px;
-border-radius:6px;
-border:1px solid #ccc;
-}
-
-.kpis{
-text-align:center;
-padding:10px;
-}
-
-.kpi-large{
-font-size:28px;
-font-weight:bold;
-color:#003366;
-margin-bottom:10px;
-}
-
-.kpi-row{
-display:flex;
-justify-content:center;
-gap:40px;
-flex-wrap:wrap;
-margin:6px 0;
-}
-
-.kpi-box{
-background:white;
-padding:8px 15px;
-border-radius:8px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
-}
-
-.charts{
-display:flex;
-justify-content:center;
-flex-wrap:wrap;
-gap:50px;
-padding:20px;
-}
-
-canvas{
-max-width:350px;
-}
-
-.bottom-bar{
-display:flex;
-justify-content:space-between;
-padding:20px;
-}
-
-footer{
-text-align:center;
-padding:15px;
-background:#e9eef5;
-font-size:14px;
-}
-
-@media print{
-body{background:white;}
-.bottom-bar, footer{display:none;}
-}
-
+body{font-family:Segoe UI;background:#f4f7fb;margin:0;color:#222}
+header{text-align:center;padding:10px;position:relative}
+#clock{position:absolute;left:15px;top:10px;font-weight:600;color:#003366}
+h1{color:#003366;margin-top:25px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:15px;padding:20px}
+.filter-group{display:flex;flex-direction:column}
+label{font-weight:600;margin-bottom:4px}
+select,input{padding:6px;border-radius:6px;border:1px solid #ccc}
+.kpis{text-align:center;padding:10px}
+.kpi-large{font-size:28px;font-weight:bold;color:#003366;margin-bottom:10px}
+.kpi-row{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;margin:6px 0}
+.kpi-box{background:white;padding:8px 15px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+.charts{display:flex;justify-content:center;gap:60px;flex-wrap:wrap;padding:20px}
+canvas{max-width:350px}
+.bottom-bar{display:flex;justify-content:space-between;padding:20px}
+footer{text-align:center;padding:12px;background:#e9eef5;font-size:14px}
+@media print{.bottom-bar,footer{display:none}}
 </style>
 </head>
 
@@ -229,26 +137,47 @@ Software Engineer MUHAMMAD UMAIR SYED</a>
 (IT Officer, Sadiq Abbasi Hospital, Bahawalpur)
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
 const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31p735zhDmgNA9Y10m7cJtA4D1igaaKDiIWRkoIWdfi3hHgVNf-zxsjsS3W9yOKw4kRawMN-1cAP6/pub?gid=30892223&single=true&output=csv";
 
 let rawData=[];
-let otChart, wardChart;
+let otChart=null;
+let wardChart=null;
 
-// Clock
+// Register DataLabels plugin
+Chart.register(ChartDataLabels);
+
+// Real Time Clock
 setInterval(()=>{
 const now=new Date();
 document.getElementById("clock").innerHTML=
-now.toLocaleString("en-US",{weekday:'long',year:'numeric',month:'long',day:'numeric'})+
-" | "+now.toLocaleTimeString('en-US',{hour12:true});
+now.toLocaleDateString("en-US",{weekday:'long',year:'numeric',month:'long',day:'numeric'})+
+" | "+now.toLocaleTimeString("en-US",{hour12:true});
 },1000);
 
-// Fetch Data
+// CSV Parser
+function parseCSV(text){
+const rows=text.trim().split("\n");
+return rows.map(row=>{
+let result=[],current='',insideQuotes=false;
+for(let char of row){
+if(char=='"'){insideQuotes=!insideQuotes;}
+else if(char==',' && !insideQuotes){result.push(current.trim());current='';}
+else{current+=char;}
+}
+result.push(current.trim());
+return result;
+});
+}
+
 fetch(sheetURL)
 .then(res=>res.text())
 .then(text=>{
-const rows=text.split("\n").slice(1);
-rawData=rows.map(r=>r.split(","));
+rawData=parseCSV(text).slice(1);
 updateDashboard();
 });
 
@@ -256,49 +185,46 @@ document.querySelectorAll("select,input").forEach(el=>{
 el.addEventListener("change",updateDashboard);
 });
 
-function ageMatch(age,group){
-age=parseInt(age);
-if(!age)return true;
-switch(group){
-case "Below 30 Days": return age<1;
-case "1 Month to 1 Year": return age>=1 && age<2;
-case "1 Year to 15 Years": return age>=2 && age<=15;
-case "15 to 30 Years": return age>15 && age<=30;
-case "30 Years to 45 Years": return age>30 && age<=45;
-case "45 Years to 60 Years": return age>45 && age<=60;
-case "65 Years & above": return age>=65;
-default:return true;
-}
-}
-
 function updateDashboard(){
-const ot=document.getElementById("ot").value;
-const ward=document.getElementById("ward").value;
-const gender=document.getElementById("gender").value;
-const ageGroup=document.getElementById("ageGroup").value;
-const type=document.getElementById("type").value;
+
+const ot=document.getElementById("ot").value.toUpperCase();
+const ward=document.getElementById("ward").value.toUpperCase();
+const gender=document.getElementById("gender").value.toUpperCase();
+const type=document.getElementById("type").value.toUpperCase();
 const fromDate=document.getElementById("fromDate").value;
 const toDate=document.getElementById("toDate").value;
 
 let filtered=rawData.filter(r=>{
-let d=new Date(r[3]);
-return (ot==="ALL OTS"||r[1]===ot) &&
-(ward==="ALL WARDS"||r[2]===ward) &&
-(gender==="ALL GENDERS"||r[6]===gender) &&
-(type==="ALL TYPES"||r[30]===type) &&
-(ageGroup==="ALL"||ageMatch(r[7],ageGroup)) &&
-(!fromDate||d>=new Date(fromDate)) &&
-(!toDate||d<=new Date(toDate));
+if(r.length<31) return false;
+
+let rowOT=(r[1]||"").toUpperCase();
+let rowWard=(r[2]||"").toUpperCase();
+let rowDate=new Date(r[3]);
+let rowGender=(r[6]||"").toUpperCase();
+let rowType=(r[30]||"").toUpperCase();
+
+return (ot==="ALL OTS"||rowOT===ot) &&
+(ward==="ALL WARDS"||rowWard===ward) &&
+(gender==="ALL GENDERS"||rowGender===gender) &&
+(type==="ALL TYPES"||rowType===type) &&
+(!fromDate||rowDate>=new Date(fromDate)) &&
+(!toDate||rowDate<=new Date(toDate));
 });
 
+updateKPIs(filtered);
+drawCharts(filtered);
+}
+
+function updateKPIs(filtered){
+
 let total=filtered.length;
-let male=filtered.filter(r=>r[6]==="MALE").length;
-let female=filtered.filter(r=>r[6]==="FEMALE").length;
-let major=filtered.filter(r=>r[30]==="MAJOR").length;
-let minor=filtered.filter(r=>r[30]==="MINOR").length;
-let local=filtered.filter(r=>r[29]==="LOCAL").length;
-let spinal=filtered.filter(r=>r[29]==="SPINAL").length;
-let general=filtered.filter(r=>r[29]==="GENERAL").length;
+let male=filtered.filter(r=>r[6]?.toUpperCase()==="MALE").length;
+let female=filtered.filter(r=>r[6]?.toUpperCase()==="FEMALE").length;
+let major=filtered.filter(r=>r[30]?.toUpperCase()==="MAJOR").length;
+let minor=filtered.filter(r=>r[30]?.toUpperCase()==="MINOR").length;
+let local=filtered.filter(r=>r[29]?.toUpperCase().includes("LOCAL")).length;
+let spinal=filtered.filter(r=>r[29]?.toUpperCase().includes("SPINAL")).length;
+let general=filtered.filter(r=>r[29]?.toUpperCase().includes("GENERAL")).length;
 
 document.getElementById("totalSurgeries").innerHTML="TOTAL SURGERIES: "+total;
 document.getElementById("maleKPI").innerHTML="Male: "+male;
@@ -308,55 +234,112 @@ document.getElementById("minorKPI").innerHTML="Minor: "+minor;
 document.getElementById("localKPI").innerHTML="Local: "+local;
 document.getElementById("spinalKPI").innerHTML="Spinal: "+spinal;
 document.getElementById("generalKPI").innerHTML="General: "+general;
-
-let otData={}, wardData={};
-filtered.forEach(r=>{
-otData[r[1]]=(otData[r[1]]||0)+1;
-wardData[r[2]]=(wardData[r[2]]||0)+1;
-});
-
-drawChart("otChart",otData,"OT Wise Surgeries");
-drawChart("wardChart",wardData,"Ward Wise Surgeries");
 }
 
-function drawChart(id,data,label){
-if(window[id]) window[id].destroy();
-const ctx=document.getElementById(id).getContext("2d");
-window[id]=new Chart(ctx,{
+function drawCharts(filtered){
+
+let otData={}, wardData={};
+
+filtered.forEach(r=>{
+let ot=r[1]||"UNKNOWN";
+let ward=r[2]||"UNKNOWN";
+otData[ot]=(otData[ot]||0)+1;
+wardData[ward]=(wardData[ward]||0)+1;
+});
+
+drawPie("otChart",otData,"OT Wise Surgeries");
+drawPie("wardChart",wardData,"Ward Wise Surgeries");
+}
+
+function drawPie(canvasId,data,title){
+
+if(window[canvasId]) window[canvasId].destroy();
+
+let ctx=document.getElementById(canvasId).getContext("2d");
+
+// Create 3D shadow plugin
+const shadowPlugin={
+id:'shadowPlugin',
+beforeDraw(chart){
+const {ctx}=chart;
+ctx.save();
+ctx.shadowColor='rgba(0,0,0,0.3)';
+ctx.shadowBlur=25;
+ctx.shadowOffsetX=5;
+ctx.shadowOffsetY=5;
+}
+};
+
+Chart.register(ChartDataLabels);
+
+let total=Object.values(data).reduce((a,b)=>a+b,0);
+
+window[canvasId]=new Chart(ctx,{
 type:"pie",
 data:{
 labels:Object.keys(data),
 datasets:[{
 data:Object.values(data),
-backgroundColor:["#4e73df","#1cc88a","#36b9cc","#f6c23e","#e74a3b"]
+backgroundColor:[
+"#4e73df",
+"#1cc88a",
+"#36b9cc",
+"#f6c23e",
+"#e74a3b",
+"#858796",
+"#5a5c69"
+],
+borderColor:"#ffffff",
+borderWidth:2,
+hoverOffset:15
 }]
 },
 options:{
+responsive:true,
+layout:{padding:20},
 plugins:{
-title:{display:true,text:label},
-legend:{position:"bottom"}
+title:{
+display:true,
+text:title,
+font:{size:16,weight:'bold'}
+},
+legend:{
+position:"bottom"
+},
+tooltip:{
+callbacks:{
+label:function(context){
+let value=context.raw;
+let percentage=((value/total)*100).toFixed(1);
+return context.label+": "+value+" ("+percentage+"%)";
 }
 }
+},
+datalabels:{
+color:"#fff",
+font:{weight:"bold",size:13},
+formatter:(value)=>{
+let percentage=((value/total)*100).toFixed(1);
+return value+" ("+percentage+"%)";
+}
+}
+}
+},
+plugins:[shadowPlugin,{
+id:'centerText',
+afterDraw(chart){
+const {ctx,width,height}=chart;
+ctx.save();
+ctx.font="bold 22px Segoe UI";
+ctx.fillStyle="#003366";
+ctx.textAlign="center";
+ctx.textBaseline="middle";
+ctx.fillText(total,width/2,height/2);
+ctx.restore();
+}
+}]
 });
 }
-
-function exportPDF(){
-const {jsPDF}=window.jspdf;
-const doc=new jsPDF();
-doc.setFontSize(14);
-doc.text("SADIQ ABBASI HOSPITAL, BAHAWALPUR",20,20);
-doc.setFontSize(12);
-doc.text(document.getElementById("totalSurgeries").innerText,20,40);
-doc.text(document.getElementById("maleKPI").innerText+" | "+document.getElementById("femaleKPI").innerText,20,50);
-doc.text(document.getElementById("majorKPI").innerText+" | "+document.getElementById("minorKPI").innerText,20,60);
-doc.text(document.getElementById("localKPI").innerText+" | "+document.getElementById("spinalKPI").innerText+" | "+document.getElementById("generalKPI").innerText,20,70);
-doc.text("Executive Summary:",20,90);
-doc.text("This report summarizes surgery data based on selected criteria filters.",20,100);
-doc.text("Generated on: "+new Date().toLocaleString(),20,120);
-doc.text("Developed By: MUHAMMAD UMAIR SYED",20,280);
-doc.save("Executive_Summary.pdf");
-}
-
 </script>
 
 </body>
